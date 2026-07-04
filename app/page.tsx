@@ -49,42 +49,134 @@ export default function HomePage() {
   }
 
   return (
-    <main className="wedding-root relative min-h-screen overflow-hidden bg-[#faf6ec] text-[#2b2620]">
+    <main className="wedding-root relative min-h-screen overflow-hidden bg-[#fbf6ec] text-[#2b241d]">
       <style jsx global>{`
-        @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap");
-
         .wedding-root {
-          --ivory: #faf6ec;
-          --card: #f5eeda;
-          --ink-green: #1f3d33;
-          --ink-green-deep: #142821;
-          --ink: #2b2620;
-          --gold: #b8912f;
-          --gold-light: #d9b969;
-          --gold-soft: #e7d29f;
-          --muted: #6f6151;
+          --ivory: #fbf6ec;
+          --paper: #fffaf0;
+          --sage: #7d8b62;
+          --forest: #1f3a31;
+          --gold: #b88a38;
+          --gold-soft: #e8d2a3;
+          --rose: #d7a09b;
+          --ink: #2b241d;
+          font-family: Georgia, "Times New Roman", serif;
         }
 
-        .wedding-root .font-display {
-          font-family: "Playfair Display", "Times New Roman", serif;
+        .wedding-root .font-script {
+          font-family: "Brush Script MT", "Segoe Script", Georgia, serif;
         }
 
-        .wedding-root .font-body {
-          font-family: "Cormorant Garamond", "Times New Roman", serif;
+        .wedding-root .opening-scene {
+          animation: scene-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
-        .wedding-root .reveal {
+        .wedding-root .phone-frame {
+          animation: phone-float 5.5s ease-in-out infinite;
+          transform-origin: center;
+        }
+
+        .wedding-root .seal {
+          animation: seal-release 4.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+          transform-origin: center;
+        }
+
+        .wedding-root .invite-cover {
+          animation: cover-open 4.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+          transform-origin: top center;
+        }
+
+        .wedding-root .invite-content {
+          animation: content-reveal 4.8s ease-in-out infinite;
+        }
+
+        .wedding-root .leaf {
+          animation: leaf-sway 6.5s ease-in-out infinite;
+          transform-origin: bottom center;
+        }
+
+        .wedding-root .leaf:nth-child(2n) {
+          animation-delay: -2.2s;
+        }
+
+        .wedding-root .fade-up {
           opacity: 0;
-          transform: translateY(14px);
-          animation: reveal-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          transform: translateY(16px);
+          animation: fade-up 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .wedding-root .reveal-1 { animation-delay: 0.05s; }
-        .wedding-root .reveal-2 { animation-delay: 0.25s; }
-        .wedding-root .reveal-3 { animation-delay: 0.45s; }
-        .wedding-root .reveal-4 { animation-delay: 0.65s; }
-        .wedding-root .reveal-5 { animation-delay: 0.85s; }
 
-        @keyframes reveal-up {
+        .wedding-root .delay-1 { animation-delay: 180ms; }
+        .wedding-root .delay-2 { animation-delay: 360ms; }
+        .wedding-root .delay-3 { animation-delay: 540ms; }
+        .wedding-root .delay-4 { animation-delay: 720ms; }
+
+        @keyframes scene-rise {
+          from {
+            opacity: 0;
+            transform: translateY(22px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes phone-float {
+          0%, 100% { transform: rotate(-4deg) translateY(0); }
+          50% { transform: rotate(-2deg) translateY(-10px); }
+        }
+
+        @keyframes seal-release {
+          0%, 22% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+          38%, 74% {
+            opacity: 0;
+            transform: translateY(-34px) scale(0.82);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes cover-open {
+          0%, 24% {
+            transform: translateY(0) scaleY(1);
+            opacity: 1;
+          }
+          45%, 74% {
+            transform: translateY(-88%) scaleY(0.18);
+            opacity: 0.18;
+          }
+          100% {
+            transform: translateY(0) scaleY(1);
+            opacity: 1;
+          }
+        }
+
+        @keyframes content-reveal {
+          0%, 28% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+          }
+          48%, 76% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+          }
+        }
+
+        @keyframes leaf-sway {
+          0%, 100% { transform: rotate(-3deg); }
+          50% { transform: rotate(5deg); }
+        }
+
+        @keyframes fade-up {
           to {
             opacity: 1;
             transform: translateY(0);
@@ -92,273 +184,197 @@ export default function HomePage() {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .wedding-root .reveal {
-            animation: none;
-            opacity: 1;
-            transform: none;
+          .wedding-root *,
+          .wedding-root *::before,
+          .wedding-root *::after {
+            animation-duration: 1ms !important;
+            animation-iteration-count: 1 !important;
+            scroll-behavior: auto !important;
           }
-        }
-
-        .wedding-root .invite-card {
-          position: relative;
-          border: 1px solid rgba(184, 145, 47, 0.55);
-          box-shadow: inset 0 0 0 4px var(--ivory), inset 0 0 0 5px rgba(184, 145, 47, 0.35);
-        }
-
-        .wedding-root .corner {
-          position: absolute;
-          width: 30px;
-          height: 30px;
-          opacity: 0.75;
-        }
-        .wedding-root .corner-tl { top: -1px; left: -1px; }
-        .wedding-root .corner-tr { top: -1px; right: -1px; transform: scaleX(-1); }
-        .wedding-root .corner-bl { bottom: -1px; left: -1px; transform: scaleY(-1); }
-        .wedding-root .corner-br { bottom: -1px; right: -1px; transform: scale(-1, -1); }
-
-        .wedding-root input,
-        .wedding-root textarea {
-          font-family: "Cormorant Garamond", serif;
         }
       `}</style>
 
-      {/* Ambient background */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_6%,rgba(31,61,51,0.06),transparent_32%),radial-gradient(circle_at_88%_14%,rgba(184,145,47,0.10),transparent_30%),linear-gradient(180deg,#fffdf7_0%,#faf6ec_45%,#f2e8d2_100%)]" />
-      <div className="pointer-events-none absolute left-1/2 top-4 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full border border-[#1f3d33]/[0.06]" />
-      <div className="pointer-events-none absolute left-1/2 top-20 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full border border-[#b8912f]/[0.14]" />
-      <div className="pointer-events-none absolute -left-24 top-56 h-64 w-64 rounded-full bg-[#1f3d33]/[0.05] blur-3xl" />
-      <div className="pointer-events-none absolute -right-28 top-96 h-72 w-72 rounded-full bg-[#b8912f]/[0.10] blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_6%,rgba(125,139,98,0.22),transparent_28%),radial-gradient(circle_at_86%_16%,rgba(184,138,56,0.18),transparent_30%),linear-gradient(180deg,#fffdf8_0%,#fbf6ec_48%,#efe1cc_100%)]" />
+      <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-[#7d8b62]/15 blur-3xl" />
+      <div className="pointer-events-none absolute -right-28 top-80 h-80 w-80 rounded-full bg-[#d7a09b]/20 blur-3xl" />
+      <div className="pointer-events-none absolute left-1/2 top-10 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full border border-[#b88a38]/15" />
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 py-6 sm:px-8 lg:px-10">
-        {/* Header */}
-        <header className="flex items-center justify-between border-b border-[#b8912f]/25 pb-5 font-body text-[0.72rem] font-semibold uppercase tracking-[0.34em] text-[#6f6151]">
+      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8 lg:px-10">
+        <header className="fade-up flex items-center justify-between border-b border-[#c9a766]/30 pb-5 text-[0.68rem] font-semibold uppercase tracking-[0.34em] text-[#76634e]">
           <span>Vjenčanje</span>
-          <span className="mx-5 h-px flex-1 bg-gradient-to-r from-transparent via-[#b8912f]/50 to-transparent" />
-          <span>04 . 07 . 2026</span>
+          <span className="mx-5 h-px flex-1 bg-gradient-to-r from-transparent via-[#b88a38]/55 to-transparent" />
+          <span>Adna & Zijad</span>
         </header>
 
-        <section className="flex flex-1 flex-col items-center pt-10 text-center sm:pt-14 lg:pt-16">
-          {/* Wax seal monogram — signature element */}
-          <div className="reveal reveal-1 mx-auto mb-6">
-            <svg width="108" height="108" viewBox="0 0 108 108" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="54" cy="54" r="50" stroke="#b8912f" strokeWidth="1.4" opacity="0.85" />
-              <circle cx="54" cy="54" r="43" stroke="#b8912f" strokeWidth="0.7" opacity="0.55" />
-              <text
-                x="54"
-                y="63"
-                textAnchor="middle"
-                fontFamily="Playfair Display, serif"
-                fontStyle="italic"
-                fontWeight="600"
-                fontSize="30"
-                fill="#1f3d33"
-              >
-                A&amp;Z
-              </text>
-            </svg>
+        <section className="grid flex-1 items-center gap-10 py-10 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12 lg:py-12">
+          <div className="order-2 text-center lg:order-1 lg:text-left">
+            <p className="fade-up delay-1 text-xs font-semibold uppercase tracking-[0.45em] text-[#9b762f]">
+              Digitalna pozivnica uspomena
+            </p>
+            <h1 className="fade-up delay-2 mt-5 text-6xl font-semibold italic leading-none text-[#1f3a31] sm:text-7xl lg:text-8xl">
+              Adna <span className="text-[#b88a38]">&</span> Zijad
+            </h1>
+            <div className="fade-up delay-2 mx-auto mt-6 h-px w-36 bg-gradient-to-r from-transparent via-[#b88a38] to-transparent lg:mx-0" />
+            <p className="fade-up delay-3 mt-7 text-2xl italic leading-9 text-[#3b3128]">
+              Hvala što ste dio našeg posebnog dana
+            </p>
+            <p className="fade-up delay-3 mx-auto mt-4 max-w-xl text-base leading-8 text-[#6d5c49] lg:mx-0">
+              Podijelite s nama fotografije, video zapise i najljepše trenutke
+              koje ste zabilježili.
+            </p>
+            <p className="fade-up delay-4 mx-auto mt-5 max-w-xl text-sm leading-7 text-[#7d6b57] lg:mx-0">
+              Skenirali ste QR kod? Upišite svoje ime, ostavite posvetu i
+              dodajte fotografije ili video zapise koje želite podijeliti s
+              nama.
+            </p>
           </div>
 
-          {/* Laurel wreath framing the names */}
-          <div className="reveal reveal-2 relative mx-auto flex w-full max-w-3xl items-center justify-center">
-            <svg
-              className="hidden sm:block"
-              width="140"
-              height="60"
-              viewBox="0 0 140 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path d="M130 8C95 8 55 20 20 46" stroke="#b8912f" strokeWidth="1.1" opacity="0.8" />
-              {[
-                [118, 11, 18], [104, 15, 32], [90, 20, 46], [76, 26, 58],
-                [62, 32, 68], [48, 38, 78], [34, 42, 86],
-              ].map(([x, y, rot], i) => (
-                <ellipse
-                  key={i}
-                  cx={x}
-                  cy={y}
-                  rx="7"
-                  ry="3.1"
-                  fill="#1f3d33"
-                  opacity={0.55 + i * 0.02}
-                  transform={`rotate(${rot} ${x} ${y})`}
-                />
-              ))}
-            </svg>
+          <div className="opening-scene order-1 mx-auto w-full max-w-sm lg:order-2 lg:max-w-md">
+            <div className="relative min-h-[470px] sm:min-h-[540px]">
+              <div className="leaf absolute left-1 top-8 h-48 w-24 rounded-full bg-[#7d8b62]/25 blur-sm [clip-path:ellipse(34%_49%_at_50%_50%)]" />
+              <div className="leaf absolute right-0 top-20 h-56 w-28 rounded-full bg-[#426854]/20 blur-sm [clip-path:ellipse(34%_49%_at_50%_50%)]" />
+              <div className="leaf absolute -left-5 bottom-20 h-44 w-24 rounded-full bg-[#9daa75]/22 blur-sm [clip-path:ellipse(34%_49%_at_50%_50%)]" />
 
-            <div className="px-2 sm:px-6">
-              <p className="font-body text-xs font-semibold uppercase tracking-[0.5em] text-[#b8912f]">
-                Vjenčanje
-              </p>
-              <h1 className="font-display mt-4 text-6xl italic leading-none text-[#142821] sm:text-7xl lg:text-8xl">
-                Adna <span className="text-[#b8912f]">&amp;</span> Zijad
-              </h1>
+              <div className="phone-frame absolute left-1/2 top-6 w-[255px] -translate-x-1/2 rounded-[2.2rem] bg-[#1f1c1a] p-3 shadow-2xl shadow-[#3c2c18]/30 sm:w-[295px]">
+                <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#f9f0dc]">
+                  <div className="absolute left-1/2 top-2 z-20 h-5 w-24 -translate-x-1/2 rounded-full bg-[#111]" />
+                  <div className="relative h-[430px] bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.55),transparent_24%),linear-gradient(145deg,#dde5c8_0%,#eef0dc_42%,#f6c9c8_100%)] sm:h-[500px]">
+                    <div className="absolute inset-0 opacity-35 [background-image:radial-gradient(#7d8b62_1px,transparent_1px)] [background-size:18px_18px]" />
+                    <div className="invite-content absolute inset-x-5 top-20 rounded-t-[1.4rem] border border-white/60 bg-white/55 px-5 pb-8 pt-10 text-center shadow-xl shadow-[#6b4b2a]/10 backdrop-blur">
+                      <p className="text-[0.62rem] uppercase tracking-[0.35em] text-[#9b762f]">
+                        Wedding memories
+                      </p>
+                      <p className="font-script mt-5 text-4xl leading-none text-[#1f3a31]">
+                        Adna & Zijad
+                      </p>
+                      <div className="mx-auto mt-5 h-px w-24 bg-gradient-to-r from-transparent via-[#b88a38] to-transparent" />
+                      <p className="mt-5 text-sm italic leading-6 text-[#5d4d3b]">
+                        Podijelite s nama trenutke koje želite sačuvati.
+                      </p>
+                    </div>
+
+                    <div className="invite-cover absolute inset-x-5 top-20 rounded-t-[1.4rem] border border-[#b88a38]/35 bg-[linear-gradient(135deg,rgba(126,142,98,0.35),rgba(247,244,220,0.95)),radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.75),transparent_24%)] px-5 py-16 text-center shadow-xl shadow-[#4d3b22]/15">
+                      <p className="font-script text-3xl text-[#1f3a31]">
+                        You are invited
+                      </p>
+                      <div className="mx-auto mt-5 h-px w-24 bg-gradient-to-r from-transparent via-[#b88a38] to-transparent" />
+                      <p className="mt-5 text-xs uppercase tracking-[0.22em] text-[#7a633b]">
+                        Adna & Zijad
+                      </p>
+                    </div>
+
+                    <div className="seal absolute left-1/2 top-28 z-30 flex h-20 w-20 -translate-x-1/2 items-center justify-center rounded-full bg-[radial-gradient(circle_at_35%_30%,#f48b84,#b93130_62%,#7f1f21)] text-[#ffd9c9] shadow-xl shadow-[#802322]/30 ring-4 ring-[#f0b1a7]/45">
+                      <span className="font-script text-2xl">A&Z</span>
+                    </div>
+
+                    <div className="absolute bottom-4 left-1/2 flex w-[82%] -translate-x-1/2 items-center justify-between rounded-full bg-white/55 px-4 py-2 text-[0.62rem] text-[#7a6a59] backdrop-blur">
+                      <span>memories.adna-zijad.ba</span>
+                      <span>♡</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="absolute bottom-0 left-1/2 w-[86%] -translate-x-1/2 rounded-full bg-[#4a321d]/20 blur-2xl h-10" />
             </div>
-
-            <svg
-              className="hidden sm:block"
-              width="140"
-              height="60"
-              viewBox="0 0 140 60"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-              style={{ transform: "scaleX(-1)" }}
-            >
-              <path d="M130 8C95 8 55 20 20 46" stroke="#b8912f" strokeWidth="1.1" opacity="0.8" />
-              {[
-                [118, 11, 18], [104, 15, 32], [90, 20, 46], [76, 26, 58],
-                [62, 32, 68], [48, 38, 78], [34, 42, 86],
-              ].map(([x, y, rot], i) => (
-                <ellipse
-                  key={i}
-                  cx={x}
-                  cy={y}
-                  rx="7"
-                  ry="3.1"
-                  fill="#1f3d33"
-                  opacity={0.55 + i * 0.02}
-                  transform={`rotate(${rot} ${x} ${y})`}
-                />
-              ))}
-            </svg>
           </div>
+        </section>
 
-          <div className="reveal reveal-2 mx-auto mt-6 h-px w-40 bg-gradient-to-r from-transparent via-[#b8912f] to-transparent" />
-
-          <p className="font-body reveal reveal-3 mx-auto mt-7 max-w-2xl text-xl italic leading-8 text-[#3f3529] sm:text-2xl">
-            Hvala što ste dio našeg posebnog dana
-          </p>
-          <p className="font-body reveal reveal-3 mx-auto mt-4 max-w-2xl text-base leading-8 text-[#5c4f3f] sm:text-lg">
-            Podijelite s nama fotografije, video zapise i najljepše trenutke
-            koje ste zabilježili.
-          </p>
-          <p className="font-body reveal reveal-3 mx-auto mt-5 max-w-2xl text-sm leading-7 text-[#6f6151] sm:text-base">
-            Skenirali ste QR kod? Upišite svoje ime, ostavite posvetu i
-            dodajte fotografije ili video zapise koje želite podijeliti s
-            nama.
-          </p>
-
-          {/* Invitation card */}
-          <section className="reveal reveal-4 mt-11 w-full max-w-2xl sm:mt-14 lg:mt-16">
-            <div className="invite-card relative rounded-md bg-[var(--card)] px-6 py-9 sm:px-10 sm:py-11">
-              <svg className="corner corner-tl" viewBox="0 0 30 30" fill="none">
-                <path d="M2 2C10 2 20 8 20 20" stroke="#b8912f" strokeWidth="1" />
-                <circle cx="2" cy="2" r="2" fill="#b8912f" />
-              </svg>
-              <svg className="corner corner-tr" viewBox="0 0 30 30" fill="none">
-                <path d="M2 2C10 2 20 8 20 20" stroke="#b8912f" strokeWidth="1" />
-                <circle cx="2" cy="2" r="2" fill="#b8912f" />
-              </svg>
-              <svg className="corner corner-bl" viewBox="0 0 30 30" fill="none">
-                <path d="M2 2C10 2 20 8 20 20" stroke="#b8912f" strokeWidth="1" />
-                <circle cx="2" cy="2" r="2" fill="#b8912f" />
-              </svg>
-              <svg className="corner corner-br" viewBox="0 0 30 30" fill="none">
-                <path d="M2 2C10 2 20 8 20 20" stroke="#b8912f" strokeWidth="1" />
-                <circle cx="2" cy="2" r="2" fill="#b8912f" />
-              </svg>
-
-              <div className="mx-auto mb-8 max-w-md text-center">
-                <p className="font-body text-[0.7rem] font-bold uppercase tracking-[0.4em] text-[#b8912f]">
+        <section className="mx-auto w-full max-w-2xl pb-12">
+          <div className="rounded-[2rem] border border-[#c9a766]/55 bg-white/55 p-2 shadow-2xl shadow-[#5d3f1e]/15 backdrop-blur-xl">
+            <div className="rounded-[1.55rem] border border-white/80 bg-[#fffaf0]/95 px-5 py-7 shadow-inner shadow-[#ead6ad] sm:px-8 sm:py-9">
+              <div className="mx-auto mb-7 max-w-md text-center">
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.36em] text-[#b88a38]">
                   Knjiga uspomena
                 </p>
-                <h2 className="font-display mt-3 text-3xl italic text-[#142821]">
+                <h2 className="mt-3 text-3xl font-semibold italic text-[#1f3a31]">
                   Podijelite uspomene
                 </h2>
-                <p className="font-body mt-3 text-base leading-7 text-[#5c4f3f] sm:text-lg">
-                  Upišite ime, ostavite posvetu i dodajte fotografije ili
-                  video zapise.
+                <p className="mt-3 text-base leading-7 text-[#6d5c49]">
+                  Upišite ime, ostavite posvetu i dodajte fotografije ili video
+                  zapise.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5 text-left">
                 <div>
-                  <label className="font-body mb-2 block text-sm font-semibold uppercase tracking-wide text-[#3f3529]">
+                  <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-[#47382b]">
                     Ime
                   </label>
                   <input
                     name="name"
                     required
                     placeholder="Vaše ime"
-                    className="w-full rounded-md border border-[#b8912f]/35 bg-[var(--ivory)] px-4 py-3.5 text-[#2b2620] shadow-sm outline-none transition placeholder:text-[#a99b8c] focus:border-[#b8912f] focus:ring-4 focus:ring-[#b8912f]/15"
+                    className="w-full rounded-2xl border border-[#dec99d] bg-white px-4 py-3.5 text-[#2b241d] shadow-sm outline-none transition placeholder:text-[#a89986] focus:border-[#b88a38] focus:ring-4 focus:ring-[#b88a38]/15"
                   />
                 </div>
 
                 <div>
-                  <label className="font-body mb-2 block text-sm font-semibold uppercase tracking-wide text-[#3f3529]">
+                  <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-[#47382b]">
                     Posveta / poruka
                   </label>
                   <textarea
                     name="message"
                     rows={5}
                     placeholder="Napišite poruku mladencima..."
-                    className="w-full resize-y rounded-md border border-[#b8912f]/35 bg-[var(--ivory)] px-4 py-3.5 text-[#2b2620] shadow-sm outline-none transition placeholder:text-[#a99b8c] focus:border-[#b8912f] focus:ring-4 focus:ring-[#b8912f]/15"
+                    className="w-full resize-y rounded-2xl border border-[#dec99d] bg-white px-4 py-3.5 text-[#2b241d] shadow-sm outline-none transition placeholder:text-[#a89986] focus:border-[#b88a38] focus:ring-4 focus:ring-[#b88a38]/15"
                   />
                 </div>
 
                 <div>
-                  <label className="font-body mb-2 block text-sm font-semibold uppercase tracking-wide text-[#3f3529]">
+                  <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-[#47382b]">
                     Fotografije ili video
                   </label>
-                  <div className="rounded-md border border-dashed border-[#b8912f]/60 bg-[var(--ivory)]/70 p-4">
+                  <div className="rounded-3xl border border-dashed border-[#b88a38]/60 bg-gradient-to-br from-[#fff8ec] to-white p-4 shadow-sm">
                     <input
                       name="files"
                       type="file"
                       multiple
                       accept="image/*,video/*"
-                      className="w-full cursor-pointer rounded-md bg-white/70 px-3 py-3 text-sm text-[#5c493b] file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-gradient-to-r file:from-[#142821] file:to-[#1f3d33] file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-[#f5eeda] hover:bg-white focus:outline-none focus:ring-4 focus:ring-[#b8912f]/15"
+                      className="w-full cursor-pointer rounded-2xl bg-white/80 px-3 py-3 text-sm text-[#5c493b] file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-gradient-to-r file:from-[#1f3a31] file:to-[#315f4f] file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-[#fff8ec] hover:bg-white focus:outline-none focus:ring-4 focus:ring-[#b88a38]/15"
                     />
-                    <p className="font-body mt-3 text-sm leading-6 text-[#6f6151]">
-                      Možete dodati više fotografija ili video zapisa
-                      odjednom.
+                    <p className="mt-3 text-sm leading-6 text-[#76634e]">
+                      Možete dodati više fotografija ili video zapisa odjednom.
                     </p>
                   </div>
                 </div>
 
                 <button
                   disabled={loading}
-                  className="group w-full rounded-md bg-gradient-to-r from-[#142821] via-[#1f3d33] to-[#2a5142] px-5 py-4 font-body text-base font-semibold uppercase tracking-wide text-[#f5eeda] shadow-lg shadow-[#142821]/20 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[#1f3d33]/25 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="group w-full rounded-2xl bg-gradient-to-r from-[#1f3a31] via-[#315f4f] to-[#b88a38] px-5 py-4 text-base font-semibold text-[#fff8ec] shadow-xl shadow-[#1f3a31]/20 transition hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-[#8b672c]/25 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <span className="inline-flex items-center justify-center gap-2">
                     {loading ? "Uspomene se šalju..." : "Pošalji uspomene"}
-                    <span className="h-px w-6 bg-[#b8912f] transition group-hover:w-9" />
+                    <span className="h-px w-6 bg-[#f3d99e] transition group-hover:w-9" />
                   </span>
                 </button>
               </form>
 
               {status && (
                 <p
-                  className={`font-body mt-5 rounded-md border px-4 py-3 text-center text-sm font-semibold leading-6 ${
+                  className={`mt-5 rounded-2xl border px-4 py-3 text-center text-sm font-semibold leading-6 ${
                     statusType === "success"
-                      ? "border-[#1f3d33]/25 bg-[#eaf1ec] text-[#1f3d33]"
-                      : "border-[#a5453a]/30 bg-[#fbecea] text-[#8a3a32]"
+                      ? "border-[#b8d7bd] bg-[#f4fbf1] text-[#315f3b]"
+                      : "border-[#e7b9b1] bg-[#fff3f1] text-[#8a3a32]"
                   }`}
                 >
                   {status}
                 </p>
               )}
             </div>
-          </section>
+          </div>
 
-          <section className="reveal reveal-5 mx-auto mt-11 max-w-xl pb-8 text-center sm:mt-12">
-            <div className="mx-auto mb-5 h-px w-28 bg-gradient-to-r from-transparent via-[#b8912f] to-transparent" />
-            <p className="font-body text-base italic leading-7 text-[#5c4f3f] sm:text-lg">
+          <div className="mx-auto mt-10 max-w-xl text-center">
+            <div className="mx-auto mb-5 h-px w-28 bg-gradient-to-r from-transparent via-[#b88a38] to-transparent" />
+            <p className="text-base italic leading-7 text-[#6d5c49]">
               Svaka fotografija i svaka poruka ostaje kao dio naše zajedničke
               uspomene.
             </p>
-          </section>
+          </div>
         </section>
 
-        <footer className="reveal reveal-5 flex items-center justify-center gap-3 border-t border-[#b8912f]/25 py-6 font-body text-sm text-[#6f6151]">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <circle cx="9" cy="9" r="8" stroke="#b8912f" strokeWidth="0.8" />
-            <text x="9" y="12.5" textAnchor="middle" fontFamily="Playfair Display, serif" fontStyle="italic" fontSize="8" fill="#b8912f">
-              AZ
-            </text>
-          </svg>
-          <span>S ljubavlju, Adna i Zijad</span>
+        <footer className="border-t border-[#c9a766]/30 py-6 text-center text-sm font-medium text-[#76634e]">
+          S ljubavlju, Adna i Zijad ♡
         </footer>
       </div>
     </main>
