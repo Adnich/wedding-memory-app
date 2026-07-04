@@ -326,7 +326,7 @@ export default function HomePage() {
                     <span aria-hidden="true">♡</span>
                     {loading ? "Uspomene se šalju..." : "Pošalji uspomene"}
                     <span className="transition group-hover:translate-x-1" aria-hidden="true">
-                      →
+                      
                     </span>
                   </span>
                 </button>
