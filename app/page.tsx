@@ -94,11 +94,11 @@ export default function HomePage() {
         }
 
         .invite-root .opened .invitation-frame {
-          width: min(100%, 760px);
-          min-height: 900px;
+          width: min(100%, 430px);
+          min-height: 860px;
           max-height: none;
           aspect-ratio: auto;
-          border-radius: 2rem;
+          border-radius: 1.75rem;
         }
 
         .invite-root .opened .cover-button {
@@ -114,6 +114,40 @@ export default function HomePage() {
           opacity: 1;
           transform: translateY(0) scale(1);
           pointer-events: auto;
+        }
+
+        .invite-root .memory-card::before,
+        .invite-root .memory-card::after {
+          content: "";
+          position: absolute;
+          pointer-events: none;
+          opacity: 0.55;
+          filter: blur(0.1px);
+        }
+
+        .invite-root .memory-card::before {
+          left: -14px;
+          top: -16px;
+          width: 150px;
+          height: 120px;
+          background:
+            radial-gradient(ellipse at 34% 46%, rgba(221, 180, 165, 0.34) 0 22%, transparent 23%),
+            radial-gradient(ellipse at 48% 28%, rgba(221, 180, 165, 0.24) 0 18%, transparent 19%),
+            radial-gradient(ellipse at 62% 52%, rgba(221, 180, 165, 0.22) 0 16%, transparent 17%),
+            linear-gradient(128deg, rgba(183, 137, 55, 0.18), transparent 58%);
+          border-top-left-radius: 1.7rem;
+        }
+
+        .invite-root .memory-card::after {
+          right: -20px;
+          top: -12px;
+          width: 145px;
+          height: 130px;
+          background:
+            radial-gradient(ellipse at 60% 36%, rgba(183, 137, 55, 0.16) 0 18%, transparent 19%),
+            radial-gradient(ellipse at 42% 62%, rgba(216, 170, 162, 0.2) 0 15%, transparent 16%),
+            linear-gradient(218deg, rgba(183, 137, 55, 0.16), transparent 60%);
+          border-top-right-radius: 1.7rem;
         }
 
         @media (max-width: 430px) {
@@ -156,82 +190,151 @@ export default function HomePage() {
             />
           </button>
 
-          <div className="letter-content relative z-10 px-5 py-8 sm:px-8 sm:py-10">
-            <div className="mx-auto max-w-xl rounded-[1.7rem] border border-[#d8bd80]/60 bg-[#fffaf0]/95 p-5 shadow-2xl shadow-[#6b4c28]/10 backdrop-blur sm:p-8">
-              <div className="text-center">
-                <div className="mx-auto flex h-20 w-20 items-center justify-center [clip-path:polygon(28%_0,72%_0,100%_28%,100%_72%,72%_100%,28%_100%,0_72%,0_28%)] bg-gradient-to-br from-[#f4da8c] via-[#bd8d36] to-[#8b5d1e] text-[#5b3710] shadow-lg shadow-[#8b5d1e]/20">
-                  <span className="script text-3xl italic">Z A</span>
+          <div className="letter-content relative z-10 p-3 sm:p-4">
+            <div className="memory-card relative mx-auto max-w-[390px] overflow-hidden rounded-[1.65rem] border border-[#d5b878]/70 bg-[#fffbf4]/96 px-5 py-7 shadow-[0_18px_55px_rgba(89,63,33,0.18),inset_0_0_0_1px_rgba(255,255,255,0.78)] sm:px-6">
+              <div className="relative z-10 text-center">
+                <div className="mx-auto flex h-[76px] w-[58px] items-center justify-center rounded-full border border-[#c6a15e]/80 bg-white/75 shadow-lg shadow-[#8b5d1e]/10">
+                  <div className="flex h-[62px] w-[46px] items-center justify-center rounded-full border border-[#d8bd80] text-[#8b6327]">
+                    <span className="script text-2xl italic leading-none">
+                      Z
+                      <span className="-ml-1 text-xl">A</span>
+                    </span>
+                  </div>
                 </div>
-                <p className="mt-6 text-[0.68rem] font-bold uppercase tracking-[0.38em] text-[#b78937]">
+
+                <p className="mt-5 text-[0.65rem] font-bold uppercase tracking-[0.34em] text-[#b78937]">
                   Adna & Zijad
                 </p>
-                <h1 className="mt-3 text-4xl font-semibold italic leading-tight text-[#2d261f] sm:text-5xl">
+                <div className="mx-auto mt-2 h-px w-24 bg-gradient-to-r from-transparent via-[#c9a45f] to-transparent" />
+                <h1 className="mt-4 text-3xl font-semibold leading-tight text-[#2f261f] sm:text-4xl">
                   Podijelite uspomene
                 </h1>
-                <p className="mx-auto mt-4 max-w-md text-base leading-7 text-[#6f6256]">
+                <p className="mx-auto mt-4 max-w-[285px] text-center text-sm leading-6 text-[#746657]">
                   Skenirali ste QR kod? Upišite svoje ime, ostavite posvetu i
                   dodajte fotografije ili video zapise koje želite podijeliti s
                   nama.
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="mt-7 space-y-5 text-left">
+              <form
+                onSubmit={handleSubmit}
+                className="relative z-10 mt-7 space-y-5 text-left"
+              >
                 <div>
-                  <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-[#4c4035]">
+                  <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#6b5641]">
+                    <span className="text-[#b78937]" aria-hidden="true">
+                      ♙
+                    </span>
                     Ime
                   </label>
                   <input
                     name="name"
                     required
                     placeholder="Vaše ime"
-                    className="w-full rounded-2xl border border-[#dfc99b] bg-white px-4 py-3.5 text-[#302820] shadow-sm outline-none transition placeholder:text-[#a99b8c] focus:border-[#b78937] focus:ring-4 focus:ring-[#b78937]/15"
+                    className="w-full rounded-lg border border-[#d8bd80] bg-white/90 px-4 py-3 text-sm text-[#302820] shadow-[0_7px_18px_rgba(89,63,33,0.08)] outline-none transition placeholder:text-[#a99b8c] focus:border-[#b78937] focus:ring-4 focus:ring-[#b78937]/15"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-[#4c4035]">
+                  <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#6b5641]">
+                    <span className="text-[#b78937]" aria-hidden="true">
+                      ♡
+                    </span>
                     Posveta / poruka
                   </label>
                   <textarea
                     name="message"
                     rows={5}
                     placeholder="Napišite poruku mladencima..."
-                    className="w-full resize-y rounded-2xl border border-[#dfc99b] bg-white px-4 py-3.5 text-[#302820] shadow-sm outline-none transition placeholder:text-[#a99b8c] focus:border-[#b78937] focus:ring-4 focus:ring-[#b78937]/15"
+                    className="w-full resize-y rounded-lg border border-[#d8bd80] bg-white/90 px-4 py-3 text-sm text-[#302820] shadow-[0_7px_18px_rgba(89,63,33,0.08)] outline-none transition placeholder:text-[#a99b8c] focus:border-[#b78937] focus:ring-4 focus:ring-[#b78937]/15"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-semibold uppercase tracking-wide text-[#4c4035]">
+                  <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#6b5641]">
+                    <span className="text-[#b78937]" aria-hidden="true">
+                      ▧
+                    </span>
                     Fotografije ili video
                   </label>
-                  <div className="rounded-3xl border border-dashed border-[#b78937]/60 bg-gradient-to-br from-[#fff8ec] to-white p-4 shadow-sm">
+
+                  <label className="group block cursor-pointer rounded-2xl border border-dashed border-[#d8bd80] bg-[#fff8ec]/70 p-4 transition hover:border-[#b78937] hover:bg-white">
                     <input
                       name="files"
                       type="file"
                       multiple
                       accept="image/*,video/*"
-                      className="w-full cursor-pointer rounded-2xl bg-white/85 px-3 py-3 text-sm text-[#5c493b] file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-gradient-to-r file:from-[#2d261f] file:to-[#8d6423] file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-[#fff8ec] hover:bg-white focus:outline-none focus:ring-4 focus:ring-[#b78937]/15"
+                      className="sr-only"
                     />
-                    <p className="mt-3 text-sm leading-6 text-[#766858]">
-                      Možete dodati više fotografija ili video zapisa odjednom.
-                    </p>
-                  </div>
+                    <span className="flex items-center gap-4">
+                      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#f2dfc9] text-[#b78937] shadow-inner">
+                        <svg
+                          width="30"
+                          height="30"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M12 16V7m0 0 3.5 3.5M12 7l-3.5 3.5"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M7.2 18.5H17a4 4 0 0 0 .7-7.94A5.5 5.5 0 0 0 7.08 8.8 4.86 4.86 0 0 0 7.2 18.5Z"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                      <span>
+                        <span className="block text-sm font-bold text-[#4b3c31]">
+                          Dodajte fotografije ili video zapise
+                        </span>
+                        <span className="mt-1 block text-xs leading-5 text-[#7c6d5e]">
+                          Kliknite za pregled ili povucite datoteke ovdje
+                        </span>
+                        <span className="mt-3 flex flex-wrap gap-2 text-[0.62rem] font-semibold uppercase tracking-wide text-[#9a7a45]">
+                          <span className="rounded-full bg-white px-2 py-1">
+                            JPG, PNG, HEIC
+                          </span>
+                          <span className="rounded-full bg-white px-2 py-1">
+                            MP4, MOV
+                          </span>
+                          <span className="rounded-full bg-white px-2 py-1">
+                            Do 1GB
+                          </span>
+                        </span>
+                      </span>
+                    </span>
+                  </label>
+
+                  <p className="mt-3 text-center text-xs leading-5 text-[#746657]">
+                    Možete dodati više fotografija ili video zapisa odjednom.
+                  </p>
                 </div>
 
                 <button
                   disabled={loading}
-                  className="group w-full rounded-2xl bg-gradient-to-r from-[#2d261f] via-[#5a4028] to-[#b78937] px-5 py-4 text-base font-semibold text-[#fff8ec] shadow-xl shadow-[#5a4028]/20 transition hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-[#8b672c]/25 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="group w-full rounded-xl border border-[#d5ad78] bg-gradient-to-r from-[#3b2d23] via-[#8f6646] to-[#b78937] px-5 py-4 text-base font-bold text-[#fff8ec] shadow-[0_10px_24px_rgba(91,60,31,0.26)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_32px_rgba(91,60,31,0.3)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <span className="inline-flex items-center justify-center gap-2">
+                  <span className="inline-flex items-center justify-center gap-3">
+                    <span aria-hidden="true">♡</span>
                     {loading ? "Uspomene se šalju..." : "Pošalji uspomene"}
-                    <span className="h-px w-6 bg-[#f3d58c] transition group-hover:w-9" />
+                    <span className="transition group-hover:translate-x-1" aria-hidden="true">
+                      →
+                    </span>
                   </span>
                 </button>
               </form>
 
               {status && (
                 <p
-                  className={`mt-5 rounded-2xl border px-4 py-3 text-center text-sm font-semibold leading-6 ${
+                  className={`relative z-10 mt-5 rounded-2xl border px-4 py-3 text-center text-sm font-semibold leading-6 ${
                     statusType === "success"
                       ? "border-[#b8d7bd] bg-[#f4fbf1] text-[#315f3b]"
                       : "border-[#e7b9b1] bg-[#fff3f1] text-[#8a3a32]"
@@ -241,8 +344,12 @@ export default function HomePage() {
                 </p>
               )}
 
-              <div className="mx-auto mt-8 h-px w-28 bg-gradient-to-r from-transparent via-[#b78937] to-transparent" />
-              <p className="mt-5 text-center text-sm italic leading-7 text-[#6f6256]">
+              <div className="relative z-10 mx-auto mt-8 flex w-32 items-center justify-center gap-2 text-[#c9a45f]">
+                <span className="h-px flex-1 bg-[#d8bd80]" />
+                <span className="text-sm">♥</span>
+                <span className="h-px flex-1 bg-[#d8bd80]" />
+              </div>
+              <p className="relative z-10 mx-auto mt-4 max-w-[260px] text-center text-xs italic leading-5 text-[#746657]">
                 Svaka fotografija i svaka poruka ostaje kao dio naše
                 zajedničke uspomene.
               </p>
