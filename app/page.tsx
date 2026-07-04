@@ -50,13 +50,13 @@ export default function HomePage() {
   }
 
   return (
-    <main className="invite-root min-h-screen overflow-x-hidden bg-[#f3ecdf] text-[#302820]">
+    <main className="invite-root min-h-screen overflow-x-hidden bg-[#eef3ec] text-[#19382e]">
       <style jsx global>{`
         .invite-root {
-          --gold: #b78937;
-          --gold-soft: #ead2a1;
-          --ink: #302820;
-          --muted: #746657;
+          --gold: #315f4f;
+          --gold-soft: #dbe8de;
+          --ink: #19382e;
+          --muted: #5f7167;
           font-family: Georgia, "Times New Roman", serif;
         }
 
@@ -166,20 +166,20 @@ export default function HomePage() {
         }
       `}</style>
 
-      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_8%,rgba(216,170,162,0.24),transparent_30%),radial-gradient(circle_at_82%_14%,rgba(183,137,55,0.18),transparent_30%),linear-gradient(180deg,#fffdf8_0%,#f3ecdf_56%,#e8d8c0_100%)]" />
-      <div className="pointer-events-none fixed -left-24 top-10 h-72 w-72 rounded-full bg-[#d8aaa2]/20 blur-3xl" />
-      <div className="pointer-events-none fixed -right-24 bottom-10 h-80 w-80 rounded-full bg-[#b78937]/15 blur-3xl" />
+      <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_20%_8%,rgba(112,137,111,0.22),transparent_30%),radial-gradient(circle_at_82%_14%,rgba(49,95,79,0.16),transparent_30%),linear-gradient(180deg,#ffffff_0%,#eef3ec_56%,#dfe9de_100%)]" />
+      <div className="pointer-events-none fixed -left-24 top-10 h-72 w-72 rounded-full bg-[#9fb59d]/25 blur-3xl" />
+      <div className="pointer-events-none fixed -right-24 bottom-10 h-80 w-80 rounded-full bg-[#315f4f]/15 blur-3xl" />
 
       <section
         className={`relative mx-auto flex min-h-screen w-full max-w-5xl items-center justify-center px-2 py-2 sm:px-6 sm:py-6 ${
           opened ? "opened items-start sm:items-center" : ""
         }`}
       >
-        <div className="invitation-frame relative overflow-hidden rounded-[1.7rem] border border-white/75 bg-[#fbf6ec] shadow-2xl shadow-[#5a3a18]/20">
+        <div className="invitation-frame relative overflow-hidden rounded-[1.7rem] border border-white/85 bg-white shadow-2xl shadow-[#19382e]/15">
           <button
             type="button"
             onClick={() => setOpened(true)}
-            className="cover-button absolute inset-0 z-30 block h-full w-full cursor-pointer overflow-hidden focus:outline-none focus:ring-4 focus:ring-[#b78937]/25"
+            className="cover-button absolute inset-0 z-30 block h-full w-full cursor-pointer overflow-hidden focus:outline-none focus:ring-4 focus:ring-[#315f4f]/25"
             aria-label="Otvori digitalnu kovertu"
           >
             <img
@@ -191,10 +191,10 @@ export default function HomePage() {
           </button>
 
           <div className="letter-content relative z-10 p-3 sm:p-4">
-            <div className="memory-card relative mx-auto max-w-[390px] overflow-hidden rounded-[1.65rem] border border-[#d5b878]/70 bg-[#fffbf4]/96 px-5 py-7 shadow-[0_18px_55px_rgba(89,63,33,0.18),inset_0_0_0_1px_rgba(255,255,255,0.78)] sm:px-6">
+            <div className="memory-card relative mx-auto max-w-[390px] overflow-hidden rounded-[1.65rem] border border-[#b9cbb9] bg-white/96 px-5 py-7 shadow-[0_18px_55px_rgba(25,56,46,0.16),inset_0_0_0_1px_rgba(255,255,255,0.9)] sm:px-6">
               <div className="relative z-10 text-center">
-                <div className="mx-auto flex h-[76px] w-[58px] items-center justify-center rounded-full border border-[#c6a15e]/80 bg-white/75 shadow-lg shadow-[#8b5d1e]/10">
-                  <div className="flex h-[62px] w-[46px] items-center justify-center rounded-full border border-[#d8bd80] text-[#8b6327]">
+                <div className="mx-auto flex h-[76px] w-[58px] items-center justify-center rounded-full border border-[#9fb59d] bg-white/85 shadow-lg shadow-[#315f4f]/10">
+                  <div className="flex h-[62px] w-[46px] items-center justify-center rounded-full border border-[#c7d6c5] text-[#315f4f]">
                     <span className="script text-2xl italic leading-none">
                       Z
                       <span className="-ml-1 text-xl">A</span>
@@ -202,14 +202,14 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <p className="mt-5 text-[0.65rem] font-bold uppercase tracking-[0.34em] text-[#b78937]">
+                <p className="mt-5 text-[0.65rem] font-bold uppercase tracking-[0.34em] text-[#315f4f]">
                   Adna & Zijad
                 </p>
-                <div className="mx-auto mt-2 h-px w-24 bg-gradient-to-r from-transparent via-[#c9a45f] to-transparent" />
-                <h1 className="mt-4 text-3xl font-semibold leading-tight text-[#2f261f] sm:text-4xl">
+                <div className="mx-auto mt-2 h-px w-24 bg-gradient-to-r from-transparent via-[#8fa78c] to-transparent" />
+                <h1 className="mt-4 text-3xl font-semibold leading-tight text-[#19382e] sm:text-4xl">
                   Podijelite uspomene
                 </h1>
-                <p className="mx-auto mt-4 max-w-[285px] text-center text-sm leading-6 text-[#746657]">
+                <p className="mx-auto mt-4 max-w-[285px] text-center text-sm leading-6 text-[#5f7167]">
                   Skenirali ste QR kod? Upišite svoje ime, ostavite posvetu i
                   dodajte fotografije ili video zapise koje želite podijeliti s
                   nama.
@@ -221,8 +221,8 @@ export default function HomePage() {
                 className="relative z-10 mt-7 space-y-5 text-left"
               >
                 <div>
-                  <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#6b5641]">
-                    <span className="text-[#b78937]" aria-hidden="true">
+                  <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#315f4f]">
+                    <span className="text-[#6f8d6a]" aria-hidden="true">
                       ♙
                     </span>
                     Ime
@@ -231,13 +231,13 @@ export default function HomePage() {
                     name="name"
                     required
                     placeholder="Vaše ime"
-                    className="w-full rounded-lg border border-[#d8bd80] bg-white/90 px-4 py-3 text-sm text-[#302820] shadow-[0_7px_18px_rgba(89,63,33,0.08)] outline-none transition placeholder:text-[#a99b8c] focus:border-[#b78937] focus:ring-4 focus:ring-[#b78937]/15"
+                    className="w-full rounded-lg border border-[#b9cbb9] bg-white/95 px-4 py-3 text-sm text-[#19382e] shadow-[0_7px_18px_rgba(25,56,46,0.08)] outline-none transition placeholder:text-[#9aa99f] focus:border-[#315f4f] focus:ring-4 focus:ring-[#315f4f]/15"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#6b5641]">
-                    <span className="text-[#b78937]" aria-hidden="true">
+                  <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#315f4f]">
+                    <span className="text-[#6f8d6a]" aria-hidden="true">
                       ♡
                     </span>
                     Posveta / poruka
@@ -246,19 +246,19 @@ export default function HomePage() {
                     name="message"
                     rows={5}
                     placeholder="Napišite poruku mladencima..."
-                    className="w-full resize-y rounded-lg border border-[#d8bd80] bg-white/90 px-4 py-3 text-sm text-[#302820] shadow-[0_7px_18px_rgba(89,63,33,0.08)] outline-none transition placeholder:text-[#a99b8c] focus:border-[#b78937] focus:ring-4 focus:ring-[#b78937]/15"
+                    className="w-full resize-y rounded-lg border border-[#b9cbb9] bg-white/95 px-4 py-3 text-sm text-[#19382e] shadow-[0_7px_18px_rgba(25,56,46,0.08)] outline-none transition placeholder:text-[#9aa99f] focus:border-[#315f4f] focus:ring-4 focus:ring-[#315f4f]/15"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#6b5641]">
-                    <span className="text-[#b78937]" aria-hidden="true">
+                  <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#315f4f]">
+                    <span className="text-[#6f8d6a]" aria-hidden="true">
                       ▧
                     </span>
                     Fotografije ili video
                   </label>
 
-                  <label className="group block cursor-pointer rounded-2xl border border-dashed border-[#d8bd80] bg-[#fff8ec]/70 p-4 transition hover:border-[#b78937] hover:bg-white">
+                  <label className="group block cursor-pointer rounded-2xl border border-dashed border-[#9fb59d] bg-[#f5faf4]/80 p-4 transition hover:border-[#315f4f] hover:bg-white">
                     <input
                       name="files"
                       type="file"
@@ -267,7 +267,7 @@ export default function HomePage() {
                       className="sr-only"
                     />
                     <span className="flex items-center gap-4">
-                      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#f2dfc9] text-[#b78937] shadow-inner">
+                      <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#dfeadd] text-[#315f4f] shadow-inner">
                         <svg
                           width="30"
                           height="30"
@@ -292,13 +292,13 @@ export default function HomePage() {
                         </svg>
                       </span>
                       <span>
-                        <span className="block text-sm font-bold text-[#4b3c31]">
+                        <span className="block text-sm font-bold text-[#19382e]">
                           Dodajte fotografije ili video zapise
                         </span>
-                        <span className="mt-1 block text-xs leading-5 text-[#7c6d5e]">
+                        <span className="mt-1 block text-xs leading-5 text-[#5f7167]">
                           Kliknite za pregled ili povucite datoteke ovdje
                         </span>
-                        <span className="mt-3 flex flex-wrap gap-2 text-[0.62rem] font-semibold uppercase tracking-wide text-[#9a7a45]">
+                        <span className="mt-3 flex flex-wrap gap-2 text-[0.62rem] font-semibold uppercase tracking-wide text-[#315f4f]">
                           <span className="rounded-full bg-white px-2 py-1">
                             JPG, PNG, HEIC
                           </span>
@@ -313,14 +313,14 @@ export default function HomePage() {
                     </span>
                   </label>
 
-                  <p className="mt-3 text-center text-xs leading-5 text-[#746657]">
+                  <p className="mt-3 text-center text-xs leading-5 text-[#5f7167]">
                     Možete dodati više fotografija ili video zapisa odjednom.
                   </p>
                 </div>
 
                 <button
                   disabled={loading}
-                  className="group w-full rounded-xl border border-[#d5ad78] bg-gradient-to-r from-[#3b2d23] via-[#8f6646] to-[#b78937] px-5 py-4 text-base font-bold text-[#fff8ec] shadow-[0_10px_24px_rgba(91,60,31,0.26)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_32px_rgba(91,60,31,0.3)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="group w-full rounded-xl border border-[#9fb59d] bg-gradient-to-r from-[#19382e] via-[#315f4f] to-[#6f8d6a] px-5 py-4 text-base font-bold text-white shadow-[0_10px_24px_rgba(25,56,46,0.24)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_32px_rgba(25,56,46,0.3)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <span className="inline-flex items-center justify-center gap-3">
                     <span aria-hidden="true">♡</span>
@@ -344,12 +344,12 @@ export default function HomePage() {
                 </p>
               )}
 
-              <div className="relative z-10 mx-auto mt-8 flex w-32 items-center justify-center gap-2 text-[#c9a45f]">
-                <span className="h-px flex-1 bg-[#d8bd80]" />
+              <div className="relative z-10 mx-auto mt-8 flex w-32 items-center justify-center gap-2 text-[#6f8d6a]">
+                <span className="h-px flex-1 bg-[#b9cbb9]" />
                 <span className="text-sm">♥</span>
-                <span className="h-px flex-1 bg-[#d8bd80]" />
+                <span className="h-px flex-1 bg-[#b9cbb9]" />
               </div>
-              <p className="relative z-10 mx-auto mt-4 max-w-[260px] text-center text-xs italic leading-5 text-[#746657]">
+              <p className="relative z-10 mx-auto mt-4 max-w-[260px] text-center text-xs italic leading-5 text-[#5f7167]">
                 Svaka fotografija i svaka poruka ostaje kao dio naše
                 zajedničke uspomene.
               </p>
