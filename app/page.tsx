@@ -114,6 +114,7 @@ export default function HomePage() {
         .envelope-root .envelope-flap {
           transform-origin: top center;
           transform: rotateX(0deg);
+          pointer-events: none;
           transition:
             transform 1050ms cubic-bezier(0.16, 1, 0.3, 1),
             opacity 800ms ease;
@@ -146,12 +147,15 @@ export default function HomePage() {
           opacity: 0;
           transform: translateY(54px) scale(0.985);
           pointer-events: none;
+          position: relative;
+          z-index: 40;
           transition:
             opacity 700ms ease 260ms,
             transform 850ms cubic-bezier(0.16, 1, 0.3, 1) 220ms;
         }
 
         .envelope-root .closed-copy {
+          pointer-events: auto;
           transition:
             opacity 420ms ease,
             transform 520ms ease;
@@ -161,6 +165,7 @@ export default function HomePage() {
           min-height: 960px;
           max-width: 760px;
           border-radius: 2rem;
+          overflow: visible;
         }
 
         .envelope-root .envelope-open .envelope-panel::before,
@@ -170,7 +175,8 @@ export default function HomePage() {
 
         .envelope-root .envelope-open .envelope-flap {
           transform: rotateX(-165deg);
-          opacity: 0.38;
+          opacity: 0;
+          visibility: hidden;
         }
 
         .envelope-root .envelope-open .gold-seal {
@@ -187,6 +193,8 @@ export default function HomePage() {
         .envelope-root .envelope-open .closed-copy {
           opacity: 0;
           transform: translateY(16px);
+          pointer-events: none;
+          visibility: hidden;
         }
 
         @media (min-width: 640px) {
