@@ -49,134 +49,146 @@ export default function HomePage() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#fffaf3] text-stone-900">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(244,194,194,0.34),_transparent_34%),linear-gradient(135deg,_#fffaf3_0%,_#fff4ea_45%,_#f8e8df_100%)]" />
-      <div className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-rose-200/40 blur-3xl" />
-      <div className="absolute -right-24 top-52 h-80 w-80 rounded-full bg-amber-200/40 blur-3xl" />
-      <div className="absolute bottom-0 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-white/70 blur-3xl" />
+    <main className="relative min-h-screen overflow-hidden bg-[#fff9f1] text-[#332820]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_8%,rgba(226,182,160,0.38),transparent_30%),radial-gradient(circle_at_88%_18%,rgba(196,151,86,0.22),transparent_27%),linear-gradient(180deg,#fffdf8_0%,#fff6ec_45%,#f5e5d8_100%)]" />
+      <div className="pointer-events-none absolute left-1/2 top-6 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full border border-[#d5b06a]/25" />
+      <div className="pointer-events-none absolute left-1/2 top-20 h-[25rem] w-[25rem] -translate-x-1/2 rounded-full border border-[#eadcc8]/70" />
+      <div className="pointer-events-none absolute -left-28 top-40 h-72 w-72 rounded-full bg-[#f1b7aa]/30 blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 top-80 h-80 w-80 rounded-full bg-[#d4a64f]/20 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-16 left-10 hidden h-32 w-32 rounded-full border border-[#c49b55]/25 sm:block" />
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-8 sm:px-8 lg:px-10">
-        <header className="flex items-center justify-between text-sm font-medium tracking-[0.22em] text-stone-600">
-          <span>VJENČANJE</span>
-          <span className="text-rose-500">♡</span>
+      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8 lg:px-10">
+        <header className="flex items-center justify-between border-b border-[#dfcaa7]/40 pb-5 text-[0.68rem] font-semibold uppercase tracking-[0.34em] text-[#7b644d]">
+          <span>Vjenčanje</span>
+          <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#caa560]/55 to-transparent mx-5" />
+          <span>Adna & Zijad</span>
         </header>
 
-        <section className="grid flex-1 items-center gap-10 py-10 lg:grid-cols-[0.92fr_1.08fr] lg:gap-14 lg:py-14">
-          <div className="text-center lg:text-left">
-            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.28em] text-rose-700">
-              Hvala što ste dio našeg posebnog dana.
+        <section className="flex flex-1 flex-col items-center pt-12 text-center sm:pt-16 lg:pt-20">
+          <div className="relative w-full max-w-4xl">
+            <div className="absolute left-1/2 top-7 h-24 w-px -translate-x-1/2 bg-gradient-to-b from-[#c49b55]/60 to-transparent" />
+            <div className="relative mx-auto mb-8 flex h-14 w-14 items-center justify-center rounded-full border border-[#d0ad6c]/50 bg-white/55 text-[#9a6d2d] shadow-sm shadow-[#b98a4a]/10 backdrop-blur">
+              <span className="text-2xl leading-none">♡</span>
+            </div>
+
+            <p className="text-xs font-semibold uppercase tracking-[0.42em] text-[#a67c3f]">
+              Vjenčanje
             </p>
-            <h1 className="text-5xl font-semibold leading-tight text-stone-950 sm:text-6xl lg:text-7xl">
+            <h1 className="mt-5 text-6xl font-semibold leading-none text-[#2d241d] sm:text-7xl lg:text-8xl">
               Adna & Zijad
             </h1>
-            <p className="mt-5 text-xl font-medium text-stone-700 sm:text-2xl">
-              Podijelite s nama najljepše uspomene s našeg vjenčanja
+            <div className="mx-auto mt-6 h-px w-40 bg-gradient-to-r from-transparent via-[#b98a4a] to-transparent" />
+            <p className="mx-auto mt-7 max-w-2xl text-xl font-medium leading-8 text-[#5a483a] sm:text-2xl">
+              Hvala što ste dio našeg posebnog dana
             </p>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-stone-600 lg:mx-0">
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-[#6f5b49] sm:text-lg">
+              Podijelite s nama fotografije, video zapise i najljepše trenutke
+              koje ste zabilježili.
+            </p>
+            <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-[#7c6857] sm:text-base">
               Skenirali ste QR kod? Upišite svoje ime, ostavite posvetu i
               dodajte fotografije ili video zapise koje želite podijeliti s
               nama.
             </p>
-
-            <div className="mx-auto mt-8 grid max-w-xl grid-cols-3 gap-3 text-center lg:mx-0">
-              <div className="rounded-2xl border border-white/70 bg-white/55 p-4 shadow-sm backdrop-blur">
-                <p className="text-2xl text-rose-700">01</p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-600">
-                  Ime
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/70 bg-white/55 p-4 shadow-sm backdrop-blur">
-                <p className="text-2xl text-rose-700">02</p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-600">
-                  Posveta
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/70 bg-white/55 p-4 shadow-sm backdrop-blur">
-                <p className="text-2xl text-rose-700">03</p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-600">
-                  Uspomene
-                </p>
-              </div>
-            </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/80 bg-white/80 p-4 shadow-2xl shadow-rose-900/10 backdrop-blur sm:p-6">
-            <div className="rounded-[1.5rem] border border-rose-100 bg-white p-5 shadow-inner shadow-amber-100/50 sm:p-8">
-              <div className="mb-6 text-center">
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-700">
-                  Knjiga uspomena
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold text-stone-950">
-                  Pošaljite nam trenutak koji želite sačuvati
-                </h2>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-stone-800">
-                    Ime
-                  </label>
-                  <input
-                    name="name"
-                    required
-                    placeholder="Vaše ime"
-                    className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-stone-950 outline-none transition placeholder:text-stone-400 focus:border-rose-300 focus:bg-white focus:ring-4 focus:ring-rose-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-stone-800">
-                    Posveta / poruka
-                  </label>
-                  <textarea
-                    name="message"
-                    rows={5}
-                    placeholder="Napišite poruku mladencima..."
-                    className="w-full resize-y rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-stone-950 outline-none transition placeholder:text-stone-400 focus:border-rose-300 focus:bg-white focus:ring-4 focus:ring-rose-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-stone-800">
-                    Fotografije ili video
-                  </label>
-                  <input
-                    name="files"
-                    type="file"
-                    multiple
-                    accept="image/*,video/*"
-                    className="w-full rounded-2xl border border-dashed border-rose-200 bg-rose-50/60 px-4 py-4 text-sm text-stone-700 file:mr-4 file:rounded-full file:border-0 file:bg-stone-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:bg-rose-50 focus:outline-none focus:ring-4 focus:ring-rose-100"
-                  />
-                  <p className="mt-2 text-sm leading-6 text-stone-600">
-                    Možete dodati više fotografija ili video zapisa odjednom.
+          <section className="mt-10 w-full max-w-2xl sm:mt-14 lg:mt-16">
+            <div className="rounded-[2rem] border border-[#d6b877]/60 bg-white/55 p-2 shadow-2xl shadow-[#8b5e34]/15 backdrop-blur-xl">
+              <div className="rounded-[1.65rem] border border-white/80 bg-[#fffdf8]/95 px-5 py-7 shadow-inner shadow-[#f2dec2] sm:px-8 sm:py-9">
+                <div className="mx-auto mb-7 max-w-md text-center">
+                  <p className="text-[0.7rem] font-bold uppercase tracking-[0.34em] text-[#b08a4f]">
+                    Knjiga uspomena
+                  </p>
+                  <h2 className="mt-3 text-3xl font-semibold text-[#2d241d]">
+                    Podijelite uspomene
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-[#6b5949] sm:text-base">
+                    Upišite ime, ostavite posvetu i dodajte fotografije ili
+                    video zapise.
                   </p>
                 </div>
 
-                <button
-                  disabled={loading}
-                  className="w-full rounded-2xl bg-stone-950 px-5 py-4 text-base font-semibold text-white shadow-lg shadow-stone-900/20 transition hover:-translate-y-0.5 hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {loading ? "Šalje se..." : "Pošalji uspomene"}
-                </button>
-              </form>
+                <form onSubmit={handleSubmit} className="space-y-5 text-left">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[#46382d]">
+                      Ime
+                    </label>
+                    <input
+                      name="name"
+                      required
+                      placeholder="Vaše ime"
+                      className="w-full rounded-2xl border border-[#e1cfb2] bg-white px-4 py-3.5 text-[#2d241d] shadow-sm outline-none transition placeholder:text-[#a99b8c] focus:border-[#c29a56] focus:ring-4 focus:ring-[#d7b16d]/20"
+                    />
+                  </div>
 
-              {status && (
-                <p
-                  className={`mt-5 rounded-2xl border px-4 py-3 text-center text-sm font-semibold leading-6 ${
-                    statusType === "success"
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                      : "border-rose-200 bg-rose-50 text-rose-800"
-                  }`}
-                >
-                  {status}
-                </p>
-              )}
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[#46382d]">
+                      Posveta / poruka
+                    </label>
+                    <textarea
+                      name="message"
+                      rows={5}
+                      placeholder="Napišite poruku mladencima..."
+                      className="w-full resize-y rounded-2xl border border-[#e1cfb2] bg-white px-4 py-3.5 text-[#2d241d] shadow-sm outline-none transition placeholder:text-[#a99b8c] focus:border-[#c29a56] focus:ring-4 focus:ring-[#d7b16d]/20"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[#46382d]">
+                      Fotografije ili video
+                    </label>
+                    <div className="rounded-3xl border border-dashed border-[#d4ad68] bg-gradient-to-br from-[#fff7ed] to-[#fffdf8] p-4 shadow-sm">
+                      <input
+                        name="files"
+                        type="file"
+                        multiple
+                        accept="image/*,video/*"
+                        className="w-full cursor-pointer rounded-2xl bg-white/80 px-3 py-3 text-sm text-[#5c493b] file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-gradient-to-r file:from-[#3b3028] file:to-[#6b4f35] file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-[#fff8ec] hover:bg-white focus:outline-none focus:ring-4 focus:ring-[#d7b16d]/20"
+                      />
+                      <p className="mt-3 text-sm leading-6 text-[#756150]">
+                        Možete dodati više fotografija ili video zapisa
+                        odjednom.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    disabled={loading}
+                    className="group w-full rounded-2xl bg-gradient-to-r from-[#2f261f] via-[#4c3828] to-[#8d6835] px-5 py-4 text-base font-semibold text-[#fff8ec] shadow-xl shadow-[#7a4f26]/20 transition hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-[#9b6f32]/25 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <span className="inline-flex items-center justify-center gap-2">
+                      {loading ? "Uspomene se šalju..." : "Pošalji uspomene"}
+                      <span className="h-px w-6 bg-[#f3d99e] transition group-hover:w-9" />
+                    </span>
+                  </button>
+                </form>
+
+                {status && (
+                  <p
+                    className={`mt-5 rounded-2xl border px-4 py-3 text-center text-sm font-semibold leading-6 ${
+                      statusType === "success"
+                        ? "border-[#b8d7bd] bg-[#f4fbf1] text-[#315f3b]"
+                        : "border-[#e7b9b1] bg-[#fff3f1] text-[#8a3a32]"
+                    }`}
+                  >
+                    {status}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
+          </section>
+
+          <section className="mx-auto mt-10 max-w-xl pb-8 text-center sm:mt-12">
+            <div className="mx-auto mb-5 h-px w-28 bg-gradient-to-r from-transparent via-[#b98a4a] to-transparent" />
+            <p className="text-sm leading-7 text-[#715d4c] sm:text-base">
+              Svaka fotografija i svaka poruka ostaje kao dio naše zajedničke
+              uspomene.
+            </p>
+          </section>
         </section>
 
-        <footer className="pb-2 text-center text-sm font-medium text-stone-600">
-          S ljubavlju, Adna i Zijad
+        <footer className="border-t border-[#dfcaa7]/40 py-5 text-center text-sm font-medium text-[#6d5847]">
+          S ljubavlju, Adna i Zijad ♡
         </footer>
       </div>
     </main>
