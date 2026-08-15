@@ -2,15 +2,11 @@
 
 import { useState } from "react";
 
-const oneMb = 1024 * 1024;
-const maxImageUploadSize = 15 * 1024 * 1024;
 const maxVideoUploadSize = 25 * 1024 * 1024;
-const maxImageDimension = 1600;
-const jpegQuality = 0.75;
 
 type FailedFile = {
   fileName: string;
-  fileSizeMB: string;
+  fileSize: string;
   fileType: string;
   reason: string;
 };
@@ -18,61 +14,27 @@ type FailedFile = {
 type UploadFile = {
   file: File;
   originalName: string;
-  originalSizeMB: string;
+  originalSize: string;
   originalType: string;
   position: number;
 };
-
-function getJpegFileName(fileName: string) {
-  const dotIndex = fileName.lastIndexOf(".");
-  const baseName = dotIndex > 0 ? fileName.slice(0, dotIndex) : fileName;
-
-  return `${baseName}.jpg`;
-}
-
-function loadImage(file: File) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const image = new Image();
-
-    image.onload = () => {
-      URL.revokeObjectURL(url);
-      resolve(image);
-    };
-
-    image.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error("Fotografiju nije moguće pripremiti."));
-    };
-
-    image.src = url;
-  });
-}
-
-function isHeicFile(file: File) {
-  const type = file.type.toLowerCase();
-  const name = file.name.toLowerCase();
-
-  return (
-    type.includes("heic") ||
-    type.includes("heif") ||
-    name.endsWith(".heic") ||
-    name.endsWith(".heif")
-  );
-}
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Došlo je do greške.";
 }
 
-function getFileSizeMB(file: File) {
-  return (file.size / 1024 / 1024).toFixed(1);
+function getFileSize(file: File) {
+  if (file.size < 1024 * 1024) {
+    return `${Math.max(1, Math.round(file.size / 1024))} KB`;
+  }
+
+  return `${(file.size / 1024 / 1024).toFixed(1)} MB`;
 }
 
 function createFailedFile(file: File, reason: string): FailedFile {
   return {
     fileName: file.name,
-    fileSizeMB: getFileSizeMB(file),
+    fileSize: getFileSize(file),
     fileType: file.type || "unknown",
     reason,
   };
@@ -83,7 +45,7 @@ function formatFailedFiles(failedFiles: FailedFile[]) {
   const hiddenCount = failedFiles.length - visibleFiles.length;
   const lines = visibleFiles.map(
     (file) =>
-      `- ${file.fileName} (${file.fileSizeMB} MB, ${file.fileType}): ${file.reason}`
+      `- ${file.fileName} (${file.fileSize}, ${file.fileType}): ${file.reason}`
   );
 
   if (hiddenCount > 0) {
@@ -91,47 +53,6 @@ function formatFailedFiles(failedFiles: FailedFile[]) {
   }
 
   return lines.join("\n");
-}
-
-async function compressImage(file: File): Promise<File> {
-  if (!file.type.startsWith("image/") || file.size < oneMb) {
-    return file;
-  }
-
-  const image = await loadImage(file);
-  const largestSide = Math.max(image.naturalWidth, image.naturalHeight);
-  const scale = Math.min(1, maxImageDimension / largestSide);
-  const width = Math.round(image.naturalWidth * scale);
-  const height = Math.round(image.naturalHeight * scale);
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
-
-  if (!context) {
-    throw new Error("Fotografiju nije moguće pripremiti.");
-  }
-
-  canvas.width = width;
-  canvas.height = height;
-  context.drawImage(image, 0, 0, width, height);
-
-  const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (result) => {
-        if (result) {
-          resolve(result);
-        } else {
-          reject(new Error("Fotografiju nije moguće pripremiti."));
-        }
-      },
-      "image/jpeg",
-      jpegQuality
-    );
-  });
-
-  return new File([blob], getJpegFileName(file.name), {
-    type: "image/jpeg",
-    lastModified: file.lastModified,
-  });
 }
 
 export default function HomePage() {
@@ -167,7 +88,7 @@ export default function HomePage() {
         throw new Error("Dodajte barem jednu sliku ili video.");
       }
 
-      setStatus("Pripremamo fotografije...");
+      setStatus("Pripremamo fajlove...");
       setStatusType("success");
 
       const uploadFiles: UploadFile[] = [];
@@ -177,114 +98,22 @@ export default function HomePage() {
       for (const [index, file] of files.entries()) {
         console.log("Original file", {
           name: file.name,
-          sizeMB: getFileSizeMB(file),
+          size: getFileSize(file),
           type: file.type || "unknown",
         });
 
-        try {
-          if (file.type.startsWith("video/")) {
-            if (file.size > maxVideoUploadSize) {
-              failedFiles.push(
-                createFailedFile(file, "Video je veći od 25 MB")
-              );
-              continue;
-            }
-
-            console.log("Processed file", {
-              originalName: file.name,
-              name: file.name,
-              sizeMB: getFileSizeMB(file),
-              type: file.type || "unknown",
-            });
-
-            uploadFiles.push({
-              file,
-              originalName: file.name,
-              originalSizeMB: getFileSizeMB(file),
-              originalType: file.type || "unknown",
-              position: index + 1,
-            });
-            continue;
-          }
-
-          if (isHeicFile(file)) {
-            if (file.size > maxImageUploadSize) {
-              failedFiles.push(
-                createFailedFile(file, "HEIC/HEIF fajl je veći od 15 MB")
-              );
-              continue;
-            }
-
-            console.log("Processed file", {
-              originalName: file.name,
-              name: file.name,
-              sizeMB: getFileSizeMB(file),
-              type: file.type || "unknown",
-            });
-
-            uploadFiles.push({
-              file,
-              originalName: file.name,
-              originalSizeMB: getFileSizeMB(file),
-              originalType: file.type || "unknown",
-              position: index + 1,
-            });
-            continue;
-          }
-
-          let processedFile: File;
-
-          try {
-            processedFile = await compressImage(file);
-          } catch (error: unknown) {
-            failedFiles.push(
-              createFailedFile(
-                file,
-                `Kompresija nije uspjela: ${getErrorMessage(error)}`
-              )
-            );
-            console.error("Compression failed", {
-              name: file.name,
-              sizeMB: getFileSizeMB(file),
-              type: file.type || "unknown",
-              error,
-            });
-            continue;
-          }
-
-          console.log("Processed file", {
-            originalName: file.name,
-            name: processedFile.name,
-            sizeMB: getFileSizeMB(processedFile),
-            type: processedFile.type || "unknown",
-          });
-
-          if (processedFile.size > maxImageUploadSize) {
-            failedFiles.push(
-              createFailedFile(
-                processedFile,
-                "Fotografija je i nakon kompresije veća od 15 MB"
-              )
-            );
-            continue;
-          }
-
-          uploadFiles.push({
-            file: processedFile,
-            originalName: file.name,
-            originalSizeMB: getFileSizeMB(file),
-            originalType: file.type || "unknown",
-            position: index + 1,
-          });
-        } catch (error: unknown) {
-          failedFiles.push(createFailedFile(file, getErrorMessage(error)));
-          console.error("File preparation failed", {
-            name: file.name,
-            sizeMB: getFileSizeMB(file),
-            type: file.type || "unknown",
-            error,
-          });
+        if (file.type.startsWith("video/") && file.size > maxVideoUploadSize) {
+          failedFiles.push(createFailedFile(file, "Video je veći od 25 MB"));
+          continue;
         }
+
+        uploadFiles.push({
+          file,
+          originalName: file.name,
+          originalSize: getFileSize(file),
+          originalType: file.type || "unknown",
+          position: index + 1,
+        });
       }
 
       for (const uploadFile of uploadFiles) {
@@ -296,7 +125,7 @@ export default function HomePage() {
         const batchFormData = new FormData();
         batchFormData.append("name", name);
         batchFormData.append("message", message);
-        batchFormData.append("files", uploadFile.file);
+        batchFormData.append("files", uploadFile.file, uploadFile.file.name);
 
         try {
           const res = await fetch(`${backendUrl}/upload`, {
@@ -318,15 +147,20 @@ export default function HomePage() {
             let backendMessage = responseBody || res.statusText || "Upload nije uspio.";
 
             try {
-              const data = JSON.parse(responseBody) as { error?: string };
-              backendMessage = data.error || backendMessage;
+              const data = JSON.parse(responseBody) as {
+                error?: string;
+                details?: string;
+              };
+              backendMessage =
+                [data.error, data.details].filter(Boolean).join(" - ") ||
+                backendMessage;
             } catch {
               backendMessage = responseBody || res.statusText || backendMessage;
             }
 
             failedFiles.push({
               fileName: uploadFile.originalName,
-              fileSizeMB: uploadFile.originalSizeMB,
+              fileSize: uploadFile.originalSize,
               fileType: uploadFile.originalType,
               reason: `Backend error ${res.status}: ${backendMessage}`,
             });
@@ -346,7 +180,7 @@ export default function HomePage() {
 
           failedFiles.push({
             fileName: uploadFile.originalName,
-            fileSizeMB: uploadFile.originalSizeMB,
+            fileSize: uploadFile.originalSize,
             fileType: uploadFile.originalType,
             reason,
           });
@@ -354,7 +188,7 @@ export default function HomePage() {
           console.error("Upload request failed", {
             fileName: uploadFile.originalName,
             processedFileName: uploadFile.file.name,
-            originalSizeMB: uploadFile.originalSizeMB,
+            originalSize: uploadFile.originalSize,
             originalType: uploadFile.originalType,
             error,
           });

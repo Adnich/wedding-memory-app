@@ -54,6 +54,25 @@ function bufferToStream(buffer: Buffer) {
   return Readable.from(buffer);
 }
 
+function getErrorDetails(error: unknown) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "response" in error &&
+    typeof error.response === "object" &&
+    error.response !== null &&
+    "data" in error.response
+  ) {
+    return JSON.stringify(error.response.data);
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Nepoznata greška.";
+}
+
 app.get("/", (_req, res) => {
   res.json({
     status: "ok",
@@ -106,14 +125,23 @@ app.post("/upload", upload.array("files"), async (req, res) => {
   try {
     const name = String(req.body.name || "").trim();
     const message = String(req.body.message || "").trim();
+    const files = req.files as Express.Multer.File[] | undefined;
+
+    console.log("Upload request received", {
+      name,
+      fileCount: files?.length || 0,
+      files: (files || []).map((file) => ({
+        originalname: file.originalname,
+        size: file.size,
+        mimetype: file.mimetype,
+      })),
+    });
 
     if (!name) {
       return res.status(400).json({
         error: "Ime je obavezno.",
       });
     }
-
-    const files = req.files as Express.Multer.File[] | undefined;
 
     if (!files || files.length === 0) {
       return res.status(400).json({
@@ -168,10 +196,15 @@ app.post("/upload", upload.array("files"), async (req, res) => {
       uploaded: uploadedFiles.length,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Upload route error", {
+      message: error instanceof Error ? error.message : error,
+      details: getErrorDetails(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
 
     return res.status(500).json({
-      error: "Upload nije uspio. Pokušajte ponovo.",
+      error: "Upload nije uspio.",
+      details: getErrorDetails(error),
     });
   }
 });
