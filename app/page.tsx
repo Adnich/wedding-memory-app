@@ -19,7 +19,7 @@ export default function HomePage() {
     const files = formData
       .getAll("files")
       .filter((file): file is File => file instanceof File && file.size > 0);
-    const batchSize = 3;
+    const batchSize = 1;
     const totalBatches = Math.ceil(files.length / batchSize);
 
     setLoading(true);
@@ -80,7 +80,7 @@ export default function HomePage() {
 
       setStatus(
         uploadStarted
-          ? "Neke uspomene nisu poslane. Pokušajte poslati manje slika odjednom."
+          ? "Neke uspomene nisu poslane. Pokušajte ponovo ili pošaljite manje fajlova."
           : `Žao nam je, nešto nije prošlo kako treba. ${message}`
       );
       setStatusType("error");
