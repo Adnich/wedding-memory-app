@@ -2,6 +2,78 @@
 
 import { useState } from "react";
 
+const twoMb = 2 * 1024 * 1024;
+const maxUploadSize = 25 * 1024 * 1024;
+const maxImageDimension = 2000;
+const jpegQuality = 0.82;
+
+function getJpegFileName(fileName: string) {
+  const dotIndex = fileName.lastIndexOf(".");
+  const baseName = dotIndex > 0 ? fileName.slice(0, dotIndex) : fileName;
+
+  return `${baseName}.jpg`;
+}
+
+function loadImage(file: File) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(image);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Fotografiju nije moguće pripremiti."));
+    };
+
+    image.src = url;
+  });
+}
+
+async function compressImage(file: File): Promise<File> {
+  if (!file.type.startsWith("image/") || file.size < twoMb) {
+    return file;
+  }
+
+  const image = await loadImage(file);
+  const largestSide = Math.max(image.naturalWidth, image.naturalHeight);
+  const scale = Math.min(1, maxImageDimension / largestSide);
+  const width = Math.round(image.naturalWidth * scale);
+  const height = Math.round(image.naturalHeight * scale);
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    throw new Error("Fotografiju nije moguće pripremiti.");
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+  context.drawImage(image, 0, 0, width, height);
+
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (result) => {
+        if (result) {
+          resolve(result);
+        } else {
+          reject(new Error("Fotografiju nije moguće pripremiti."));
+        }
+      },
+      "image/jpeg",
+      jpegQuality
+    );
+  });
+
+  return new File([blob], getJpegFileName(file.name), {
+    type: "image/jpeg",
+    lastModified: file.lastModified,
+  });
+}
+
 export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
@@ -19,8 +91,6 @@ export default function HomePage() {
     const files = formData
       .getAll("files")
       .filter((file): file is File => file instanceof File && file.size > 0);
-    const batchSize = 1;
-    const totalBatches = Math.ceil(files.length / batchSize);
 
     setLoading(true);
     setStatus("");
@@ -39,22 +109,43 @@ export default function HomePage() {
         throw new Error("Dodajte barem jednu sliku ili video.");
       }
 
-      for (let index = 0; index < totalBatches; index += 1) {
-        setStatus(`Šalje se ${index + 1}/${totalBatches}...`);
+      setStatus("Pripremamo fotografije...");
+      setStatusType("success");
+
+      const processedFiles: File[] = [];
+
+      for (const file of files) {
+        if (file.type.startsWith("video/")) {
+          if (file.size > maxUploadSize) {
+            throw new Error(
+              "Video je prevelik. Molimo pošaljite kraći video ili samo fotografije."
+            );
+          }
+
+          processedFiles.push(file);
+          continue;
+        }
+
+        const processedFile = await compressImage(file);
+
+        if (processedFile.size > maxUploadSize) {
+          throw new Error(
+            "Jedna fotografija je prevelika. Pokušajte je smanjiti ili poslati drugu."
+          );
+        }
+
+        processedFiles.push(processedFile);
+      }
+
+      for (let index = 0; index < processedFiles.length; index += 1) {
+        setStatus(`Šalje se ${index + 1}/${processedFiles.length}...`);
         setStatusType("success");
 
+        const file = processedFiles[index];
         const batchFormData = new FormData();
         batchFormData.append("name", name);
         batchFormData.append("message", message);
-
-        const batchFiles = files.slice(
-          index * batchSize,
-          index * batchSize + batchSize
-        );
-
-        for (const file of batchFiles) {
-          batchFormData.append("files", file);
-        }
+        batchFormData.append("files", file);
 
         uploadStarted = true;
 
@@ -80,8 +171,8 @@ export default function HomePage() {
 
       setStatus(
         uploadStarted
-          ? "Neke uspomene nisu poslane. Pokušajte ponovo ili pošaljite manje fajlova."
-          : `Žao nam je, nešto nije prošlo kako treba. ${message}`
+          ? "Neke uspomene nisu poslane. Pokušajte ponovo sa manje fajlova ili bez velikih video zapisa."
+          : message
       );
       setStatusType("error");
     } finally {
