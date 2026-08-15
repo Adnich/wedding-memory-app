@@ -9,13 +9,17 @@ const maxImageDimension = 1600;
 const jpegQuality = 0.75;
 
 type FailedFile = {
-  name: string;
+  fileName: string;
+  fileSizeMB: string;
+  fileType: string;
   reason: string;
 };
 
 type UploadFile = {
   file: File;
   originalName: string;
+  originalSizeMB: string;
+  originalType: string;
   position: number;
 };
 
@@ -59,6 +63,34 @@ function isHeicFile(file: File) {
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Došlo je do greške.";
+}
+
+function getFileSizeMB(file: File) {
+  return (file.size / 1024 / 1024).toFixed(1);
+}
+
+function createFailedFile(file: File, reason: string): FailedFile {
+  return {
+    fileName: file.name,
+    fileSizeMB: getFileSizeMB(file),
+    fileType: file.type || "unknown",
+    reason,
+  };
+}
+
+function formatFailedFiles(failedFiles: FailedFile[]) {
+  const visibleFiles = failedFiles.slice(0, 6);
+  const hiddenCount = failedFiles.length - visibleFiles.length;
+  const lines = visibleFiles.map(
+    (file) =>
+      `- ${file.fileName} (${file.fileSizeMB} MB, ${file.fileType}): ${file.reason}`
+  );
+
+  if (hiddenCount > 0) {
+    lines.push(`- Još ${hiddenCount} fajlova nije prošlo.`);
+  }
+
+  return lines.join("\n");
 }
 
 async function compressImage(file: File): Promise<File> {
@@ -143,19 +175,33 @@ export default function HomePage() {
       let successfulUploads = 0;
 
       for (const [index, file] of files.entries()) {
+        console.log("Original file", {
+          name: file.name,
+          sizeMB: getFileSizeMB(file),
+          type: file.type || "unknown",
+        });
+
         try {
           if (file.type.startsWith("video/")) {
             if (file.size > maxVideoUploadSize) {
-              failedFiles.push({
-                name: file.name,
-                reason: "video je prevelik",
-              });
+              failedFiles.push(
+                createFailedFile(file, "Video je veći od 25 MB")
+              );
               continue;
             }
+
+            console.log("Processed file", {
+              originalName: file.name,
+              name: file.name,
+              sizeMB: getFileSizeMB(file),
+              type: file.type || "unknown",
+            });
 
             uploadFiles.push({
               file,
               originalName: file.name,
+              originalSizeMB: getFileSizeMB(file),
+              originalType: file.type || "unknown",
               position: index + 1,
             });
             continue;
@@ -163,40 +209,80 @@ export default function HomePage() {
 
           if (isHeicFile(file)) {
             if (file.size > maxImageUploadSize) {
-              failedFiles.push({
-                name: file.name,
-                reason: "HEIC je prevelik",
-              });
+              failedFiles.push(
+                createFailedFile(file, "HEIC/HEIF fajl je veći od 15 MB")
+              );
               continue;
             }
+
+            console.log("Processed file", {
+              originalName: file.name,
+              name: file.name,
+              sizeMB: getFileSizeMB(file),
+              type: file.type || "unknown",
+            });
 
             uploadFiles.push({
               file,
               originalName: file.name,
+              originalSizeMB: getFileSizeMB(file),
+              originalType: file.type || "unknown",
               position: index + 1,
             });
             continue;
           }
 
-          const processedFile = await compressImage(file);
+          let processedFile: File;
+
+          try {
+            processedFile = await compressImage(file);
+          } catch (error: unknown) {
+            failedFiles.push(
+              createFailedFile(
+                file,
+                `Kompresija nije uspjela: ${getErrorMessage(error)}`
+              )
+            );
+            console.error("Compression failed", {
+              name: file.name,
+              sizeMB: getFileSizeMB(file),
+              type: file.type || "unknown",
+              error,
+            });
+            continue;
+          }
+
+          console.log("Processed file", {
+            originalName: file.name,
+            name: processedFile.name,
+            sizeMB: getFileSizeMB(processedFile),
+            type: processedFile.type || "unknown",
+          });
 
           if (processedFile.size > maxImageUploadSize) {
-            failedFiles.push({
-              name: file.name,
-              reason: "prevelika nakon kompresije",
-            });
+            failedFiles.push(
+              createFailedFile(
+                processedFile,
+                "Fotografija je i nakon kompresije veća od 15 MB"
+              )
+            );
             continue;
           }
 
           uploadFiles.push({
             file: processedFile,
             originalName: file.name,
+            originalSizeMB: getFileSizeMB(file),
+            originalType: file.type || "unknown",
             position: index + 1,
           });
         } catch (error: unknown) {
-          failedFiles.push({
+          failedFiles.push(createFailedFile(file, getErrorMessage(error)));
+          console.error("File preparation failed", {
             name: file.name,
-            reason: getErrorMessage(error),
+            sizeMB: getFileSizeMB(file),
+            type: file.type || "unknown",
+            error,
           });
         }
       }
@@ -218,28 +304,59 @@ export default function HomePage() {
             body: batchFormData,
           });
 
+          const responseBody = await res.text();
+
+          console.log("Backend upload response", {
+            fileName: uploadFile.originalName,
+            processedFileName: uploadFile.file.name,
+            status: res.status,
+            ok: res.ok,
+            body: responseBody,
+          });
+
           if (!res.ok) {
-            let reason = "Upload nije uspio.";
+            let backendMessage = responseBody || res.statusText || "Upload nije uspio.";
 
             try {
-              const data = (await res.json()) as { error?: string };
-              reason = data.error || reason;
+              const data = JSON.parse(responseBody) as { error?: string };
+              backendMessage = data.error || backendMessage;
             } catch {
-              reason = res.statusText || reason;
+              backendMessage = responseBody || res.statusText || backendMessage;
             }
 
             failedFiles.push({
-              name: uploadFile.originalName,
-              reason,
+              fileName: uploadFile.originalName,
+              fileSizeMB: uploadFile.originalSizeMB,
+              fileType: uploadFile.originalType,
+              reason: `Backend error ${res.status}: ${backendMessage}`,
+            });
+
+            console.error("Backend upload failed", {
+              fileName: uploadFile.originalName,
+              processedFileName: uploadFile.file.name,
+              status: res.status,
+              body: responseBody,
             });
             continue;
           }
 
           successfulUploads += 1;
         } catch (error: unknown) {
+          const reason = `Upload request nije uspio: ${getErrorMessage(error)}`;
+
           failedFiles.push({
-            name: uploadFile.originalName,
-            reason: getErrorMessage(error),
+            fileName: uploadFile.originalName,
+            fileSizeMB: uploadFile.originalSizeMB,
+            fileType: uploadFile.originalType,
+            reason,
+          });
+
+          console.error("Upload request failed", {
+            fileName: uploadFile.originalName,
+            processedFileName: uploadFile.file.name,
+            originalSizeMB: uploadFile.originalSizeMB,
+            originalType: uploadFile.originalType,
+            error,
           });
         }
       }
@@ -256,19 +373,19 @@ export default function HomePage() {
       }
 
       if (successfulUploads > 0) {
-        const failedList = failedFiles
-          .map((file) => `${file.name} (${file.reason})`)
-          .join(", ");
-
         setStatus(
-          `Poslano je ${successfulUploads} od ${files.length} fajlova. Neki fajlovi nisu prošli: ${failedList}. Pokušajte njih poslati posebno.`
+          `Poslano je ${successfulUploads} od ${files.length} fajlova.\nNisu prošli:\n${formatFailedFiles(
+            failedFiles
+          )}\nPokušajte njih poslati posebno.`
         );
         setStatusType("error");
         return;
       }
 
       setStatus(
-        "Nijedan fajl nije poslan. Pokušajte sa manjim fotografijama ili bez velikih video zapisa."
+        `Nijedan fajl nije poslan. Pokušajte sa manjim fotografijama ili bez velikih video zapisa.\nNisu prošli:\n${formatFailedFiles(
+          failedFiles
+        )}`
       );
       setStatusType("error");
     } catch (error: unknown) {
@@ -573,7 +690,7 @@ export default function HomePage() {
                     statusType === "success"
                       ? "border-[#b8d7bd] bg-[#f4fbf1] text-[#315f3b]"
                       : "border-[#e7b9b1] bg-[#fff3f1] text-[#8a3a32]"
-                  }`}
+                  } whitespace-pre-line`}
                 >
                   {status}
                 </p>
