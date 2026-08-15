@@ -14,10 +14,19 @@ export default function HomePage() {
 
     const form = e.currentTarget;
     const formData = new FormData(form);
+    const name = String(formData.get("name") || "");
+    const message = String(formData.get("message") || "");
+    const files = formData
+      .getAll("files")
+      .filter((file): file is File => file instanceof File && file.size > 0);
+    const batchSize = 3;
+    const totalBatches = Math.ceil(files.length / batchSize);
 
     setLoading(true);
     setStatus("");
     setStatusType("");
+
+    let uploadStarted = false;
 
     try {
       const backendUrl = process.env.NEXT_PUBLIC_UPLOAD_API_URL;
@@ -26,15 +35,39 @@ export default function HomePage() {
         throw new Error("Backend URL nije podešen.");
       }
 
-      const res = await fetch(`${backendUrl}/upload`, {
-        method: "POST",
-        body: formData,
-      });
+      if (files.length === 0) {
+        throw new Error("Dodajte barem jednu sliku ili video.");
+      }
 
-      const data = await res.json();
+      for (let index = 0; index < totalBatches; index += 1) {
+        setStatus(`Šalje se ${index + 1}/${totalBatches}...`);
+        setStatusType("success");
 
-      if (!res.ok) {
-        throw new Error(data.error || "Upload nije uspio.");
+        const batchFormData = new FormData();
+        batchFormData.append("name", name);
+        batchFormData.append("message", message);
+
+        const batchFiles = files.slice(
+          index * batchSize,
+          index * batchSize + batchSize
+        );
+
+        for (const file of batchFiles) {
+          batchFormData.append("files", file);
+        }
+
+        uploadStarted = true;
+
+        const res = await fetch(`${backendUrl}/upload`, {
+          method: "POST",
+          body: batchFormData,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Upload nije uspio.");
+        }
       }
 
       setStatus("Hvala vam! Vaše uspomene su uspješno poslane.");
@@ -44,7 +77,12 @@ export default function HomePage() {
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Došlo je do greške.";
-      setStatus(`Žao nam je, nešto nije prošlo kako treba. ${message}`);
+
+      setStatus(
+        uploadStarted
+          ? "Neke uspomene nisu poslane. Pokušajte poslati manje slika odjednom."
+          : `Žao nam je, nešto nije prošlo kako treba. ${message}`
+      );
       setStatusType("error");
     } finally {
       setLoading(false);
