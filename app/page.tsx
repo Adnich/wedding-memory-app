@@ -7,6 +7,7 @@ export default function HomePage() {
   const [status, setStatus] = useState("");
   const [statusType, setStatusType] = useState<"success" | "error" | "">("");
   const [opened, setOpened] = useState(false);
+  const [selectedFileCount, setSelectedFileCount] = useState(0);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,6 +40,7 @@ export default function HomePage() {
       setStatus("Hvala vam! Vaše uspomene su uspješno poslane.");
       setStatusType("success");
       form.reset();
+      setSelectedFileCount(0);
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Došlo je do greške.";
@@ -265,6 +267,9 @@ export default function HomePage() {
                       multiple
                       accept="image/*,video/*"
                       className="sr-only"
+                      onChange={(event) =>
+                        setSelectedFileCount(event.target.files?.length ?? 0)
+                      }
                     />
                     <span className="flex items-center gap-4">
                       <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#dfeadd] text-[#315f4f] shadow-inner">
@@ -293,7 +298,9 @@ export default function HomePage() {
                       </span>
                       <span>
                         <span className="block text-sm font-bold text-[#19382e]">
-                          Dodajte fotografije ili video zapise
+                          {selectedFileCount > 0
+                            ? `Dodali ste ${selectedFileCount} slika ili videa`
+                            : "Dodajte fotografije ili video zapise"}
                         </span>
                         <span className="mt-1 block text-xs leading-5 text-[#5f7167]">
                           Kliknite za pregled ili povucite datoteke ovdje
