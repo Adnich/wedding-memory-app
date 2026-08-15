@@ -19,7 +19,6 @@ app.use(
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    files: 10,
     fileSize: 100 * 1024 * 1024,
   },
 });
@@ -103,7 +102,7 @@ app.get("/admin/messages", async (req, res) => {
   }
 });
 
-app.post("/upload", upload.array("files", 10), async (req, res) => {
+app.post("/upload", upload.array("files"), async (req, res) => {
   try {
     const name = String(req.body.name || "").trim();
     const message = String(req.body.message || "").trim();

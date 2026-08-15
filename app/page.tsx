@@ -299,7 +299,7 @@ export default function HomePage() {
                       <span>
                         <span className="block text-sm font-bold text-[#19382e]">
                           {selectedFileCount > 0
-                            ? `Dodali ste ${selectedFileCount} slika ili videa`
+                            ? `Dodali ste ${selectedFileCount} slika`
                             : "Dodajte fotografije ili video zapise"}
                         </span>
                         <span className="mt-1 block text-xs leading-5 text-[#5f7167]">
