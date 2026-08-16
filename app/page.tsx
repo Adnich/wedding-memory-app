@@ -1,8 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import {
+  MAX_FILE_COUNT,
+  MAX_FILE_RETRIES,
+  MAX_FILE_SIZE_BYTES,
+  calculateUploadPercentage,
+  canAddFiles,
+  processUploadQueue,
+  sortFilesSmallestFirst,
+  type UploadAttemptContext,
+} from "./upload-queue";
 
-const maxVideoUploadSize = 25 * 1024 * 1024;
+const CHUNK_RECOVERY_ATTEMPTS = 5;
 
 type FailedFile = {
   fileName: string;
@@ -13,10 +23,27 @@ type FailedFile = {
 
 type UploadFile = {
   file: File;
-  originalName: string;
-  originalSize: string;
-  originalType: string;
   position: number;
+  sessionUrl?: string;
+  uploadToken?: string;
+  confirmedBytes: number;
+};
+
+type InitUploadResponse = {
+  alreadyComplete: boolean;
+  uploadToken?: string;
+  sessionUrl?: string;
+  chunkSizeBytes?: number;
+};
+
+type UploadStatusResponse = {
+  state: "complete" | "incomplete" | "expired";
+  confirmedBytes?: number;
+};
+
+type CompleteUploadResponse = {
+  success: boolean;
+  metadataRecorded: boolean;
 };
 
 function getErrorMessage(error: unknown) {
@@ -55,12 +82,275 @@ function formatFailedFiles(failedFiles: FailedFile[]) {
   return lines.join("\n");
 }
 
+function wait(milliseconds: number) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+async function requestJson<T>(url: string, body: unknown) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const text = await response.text();
+  let data: (T & { error?: string }) | undefined;
+
+  try {
+    data = text ? (JSON.parse(text) as T & { error?: string }) : undefined;
+  } catch {
+    data = undefined;
+  }
+
+  if (!response.ok) {
+    throw new Error(data?.error || text || `HTTP greška ${response.status}.`);
+  }
+
+  if (!data) throw new Error("Server nije vratio očekivani odgovor.");
+  return data;
+}
+
+function putDriveChunk(
+  sessionUrl: string,
+  file: File,
+  start: number,
+  endExclusive: number,
+  onProgress: (loadedBytes: number) => void
+) {
+  return new Promise<number>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const chunk = file.slice(start, endExclusive);
+    xhr.open("PUT", sessionUrl);
+    xhr.timeout = 5 * 60 * 1000;
+    xhr.setRequestHeader("Content-Type", file.type || "application/octet-stream");
+    xhr.setRequestHeader(
+      "Content-Range",
+      `bytes ${start}-${endExclusive - 1}/${file.size}`
+    );
+    xhr.upload.onprogress = (event) => onProgress(event.loaded);
+    xhr.onload = () => {
+      if (xhr.status === 308 || xhr.status === 200 || xhr.status === 201) {
+        resolve(xhr.status);
+      } else {
+        reject(new Error(`Drive je vratio HTTP ${xhr.status}.`));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Mrežna veza je prekinuta."));
+    xhr.ontimeout = () => reject(new Error("Slanje dijela fajla je isteklo."));
+    xhr.onabort = () => reject(new Error("Slanje fajla je prekinuto."));
+    xhr.send(chunk);
+  });
+}
+
+async function initializeUpload(
+  uploadFile: UploadFile,
+  backendUrl: string,
+  name: string,
+  message: string
+) {
+  const response = await requestJson<InitUploadResponse>(
+    `${backendUrl}/uploads/init`,
+    uploadFile.uploadToken
+      ? { uploadToken: uploadFile.uploadToken }
+      : {
+          name,
+          message,
+          file: {
+            name: uploadFile.file.name,
+            size: uploadFile.file.size,
+            type: uploadFile.file.type || "application/octet-stream",
+          },
+        }
+  );
+
+  if (response.uploadToken) uploadFile.uploadToken = response.uploadToken;
+  if (response.alreadyComplete) return { complete: true, chunkSizeBytes: 0 };
+  if (!response.sessionUrl || !response.uploadToken || !response.chunkSizeBytes)
+    throw new Error("Drive upload sesija nije ispravno pokrenuta.");
+
+  uploadFile.sessionUrl = response.sessionUrl;
+  uploadFile.uploadToken = response.uploadToken;
+  uploadFile.confirmedBytes = 0;
+  return { complete: false, chunkSizeBytes: response.chunkSizeBytes };
+}
+
+async function queryUploadStatus(uploadFile: UploadFile, backendUrl: string) {
+  if (!uploadFile.sessionUrl || !uploadFile.uploadToken)
+    throw new Error("Upload sesija nedostaje.");
+
+  return requestJson<UploadStatusResponse>(`${backendUrl}/uploads/status`, {
+    sessionUrl: uploadFile.sessionUrl,
+    uploadToken: uploadFile.uploadToken,
+  });
+}
+
+async function confirmUpload(uploadFile: UploadFile, backendUrl: string) {
+  if (!uploadFile.uploadToken)
+    throw new Error("Upload potvrda nedostaje.");
+
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await requestJson<CompleteUploadResponse>(
+        `${backendUrl}/uploads/complete`,
+        { uploadToken: uploadFile.uploadToken }
+      );
+      if (!response.metadataRecorded) {
+        console.warn("Drive upload je uspio, ali Sheets metadata nije zapisana.", {
+          fileName: uploadFile.file.name,
+        });
+      }
+      return true;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 2) await wait(500 * 2 ** attempt);
+    }
+  }
+  console.error("Drive fajl je siguran, ali završna metadata potvrda nije uspjela.", {
+    fileName: uploadFile.file.name,
+    error: lastError,
+  });
+  return false;
+}
+
+async function uploadFileAttempt(
+  uploadFile: UploadFile,
+  backendUrl: string,
+  name: string,
+  message: string,
+  onProgress: (percentage: number) => void
+) {
+  let chunkSizeBytes = 8 * 1024 * 1024;
+
+  if (uploadFile.sessionUrl && uploadFile.uploadToken) {
+    const status = await queryUploadStatus(uploadFile, backendUrl);
+    if (status.state === "complete") {
+      uploadFile.confirmedBytes = uploadFile.file.size;
+      onProgress(100);
+      await confirmUpload(uploadFile, backendUrl);
+      return;
+    }
+    if (status.state === "expired") {
+      uploadFile.sessionUrl = undefined;
+      uploadFile.confirmedBytes = 0;
+    } else {
+      uploadFile.confirmedBytes = status.confirmedBytes || 0;
+    }
+  }
+
+  if (!uploadFile.sessionUrl) {
+    const initialized = await initializeUpload(uploadFile, backendUrl, name, message);
+    if (initialized.complete) {
+      uploadFile.confirmedBytes = uploadFile.file.size;
+      onProgress(100);
+      await confirmUpload(uploadFile, backendUrl);
+      return;
+    }
+    chunkSizeBytes = initialized.chunkSizeBytes;
+  }
+
+  while (uploadFile.confirmedBytes < uploadFile.file.size) {
+    const start = uploadFile.confirmedBytes;
+    const endExclusive = Math.min(start + chunkSizeBytes, uploadFile.file.size);
+    let chunkFinished = false;
+    let lastError: unknown;
+
+    for (let recovery = 0; recovery < CHUNK_RECOVERY_ATTEMPTS; recovery += 1) {
+      try {
+        const statusCode = await putDriveChunk(
+          uploadFile.sessionUrl!,
+          uploadFile.file,
+          start,
+          endExclusive,
+          (loadedBytes) =>
+            onProgress(
+              calculateUploadPercentage(start, loadedBytes, uploadFile.file.size)
+            )
+        );
+        if (statusCode === 200 || statusCode === 201) {
+          uploadFile.confirmedBytes = uploadFile.file.size;
+          chunkFinished = true;
+        } else {
+          const driveStatus = await queryUploadStatus(uploadFile, backendUrl);
+          if (driveStatus.state === "complete") {
+            uploadFile.confirmedBytes = uploadFile.file.size;
+            chunkFinished = true;
+          } else if (driveStatus.state === "incomplete") {
+            uploadFile.confirmedBytes = driveStatus.confirmedBytes || 0;
+            chunkFinished = uploadFile.confirmedBytes > start;
+          } else {
+            throw new Error("Drive upload sesija je istekla.");
+          }
+        }
+        onProgress(
+          calculateUploadPercentage(
+            uploadFile.confirmedBytes,
+            0,
+            uploadFile.file.size
+          )
+        );
+        break;
+      } catch (error) {
+        lastError = error;
+        if (recovery < CHUNK_RECOVERY_ATTEMPTS - 1)
+          await wait(1_000 * 2 ** recovery);
+
+        try {
+          const status = await queryUploadStatus(uploadFile, backendUrl);
+          if (status.state === "complete") {
+            uploadFile.confirmedBytes = uploadFile.file.size;
+            chunkFinished = true;
+            break;
+          }
+          if (status.state === "expired") break;
+          uploadFile.confirmedBytes = status.confirmedBytes || 0;
+          if (uploadFile.confirmedBytes !== start) {
+            chunkFinished = true;
+            break;
+          }
+        } catch (statusError) {
+          lastError = statusError;
+        }
+      }
+    }
+
+    if (!chunkFinished) throw lastError || new Error("Fajl nije poslan.");
+  }
+
+  onProgress(100);
+  await confirmUpload(uploadFile, backendUrl);
+}
+
 export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [statusType, setStatusType] = useState<"success" | "error" | "">("");
+  const [statusFileName, setStatusFileName] = useState("");
   const [opened, setOpened] = useState(false);
-  const [selectedFileCount, setSelectedFileCount] = useState(0);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleFilesSelected(event: React.ChangeEvent<HTMLInputElement>) {
+    const addedFiles = Array.from(event.target.files || []).filter(
+      (file) => file.size > 0
+    );
+    event.target.value = "";
+
+    if (addedFiles.length === 0) return;
+
+    if (!canAddFiles(selectedFiles.length, addedFiles.length)) {
+      setStatus(
+        `Maksimalno je ${MAX_FILE_COUNT} fajlova po jednom slanju. Odaberite najviše ${MAX_FILE_COUNT} fajlova, a preostale pošaljite u sljedećem slanju.`
+      );
+      setStatusType("error");
+      setStatusFileName("");
+      return;
+    }
+
+    setSelectedFiles((current) => [...current, ...addedFiles]);
+    setStatus("");
+    setStatusType("");
+    setStatusFileName("");
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -69,13 +359,12 @@ export default function HomePage() {
     const formData = new FormData(form);
     const name = String(formData.get("name") || "");
     const message = String(formData.get("message") || "");
-    const files = formData
-      .getAll("files")
-      .filter((file): file is File => file instanceof File && file.size > 0);
+    const files = [...selectedFiles];
 
     setLoading(true);
     setStatus("");
     setStatusType("");
+    setStatusFileName("");
 
     try {
       const backendUrl = process.env.NEXT_PUBLIC_UPLOAD_API_URL;
@@ -88,117 +377,97 @@ export default function HomePage() {
         throw new Error("Dodajte barem jednu sliku ili video.");
       }
 
+      if (files.length > MAX_FILE_COUNT) {
+        throw new Error(
+          `Maksimalno je ${MAX_FILE_COUNT} fajlova po jednom slanju. Preostale fajlove pošaljite u sljedećem slanju.`
+        );
+      }
+
+      const oversizedFiles = files.filter(
+        (file) => file.size > MAX_FILE_SIZE_BYTES
+      );
+      if (oversizedFiles.length > 0) {
+        throw new Error(
+          `Svaki fajl može imati najviše 1 GB (${MAX_FILE_SIZE_BYTES.toLocaleString("en-US")} bajtova). Smanjite izbor za: ${oversizedFiles
+            .slice(0, 3)
+            .map((file) => file.name)
+            .join(", ")}${oversizedFiles.length > 3 ? "…" : ""}`
+        );
+      }
+
+      const unsupportedFiles = files.filter(
+        (file) =>
+          !file.type.startsWith("image/") &&
+          !file.type.startsWith("video/") &&
+          !/\.(jpe?g|png|heic|heif|mp4|mov)$/i.test(file.name)
+      );
+      if (unsupportedFiles.length > 0) {
+        throw new Error(
+          `Odaberite samo fotografije ili video zapise. Nije podržano: ${unsupportedFiles
+            .slice(0, 3)
+            .map((file) => file.name)
+            .join(", ")}${unsupportedFiles.length > 3 ? "…" : ""}`
+        );
+      }
+
       setStatus("Pripremamo fajlove...");
       setStatusType("success");
 
-      const uploadFiles: UploadFile[] = [];
-      const failedFiles: FailedFile[] = [];
-      let successfulUploads = 0;
-
-      for (const [index, file] of files.entries()) {
-        console.log("Original file", {
-          name: file.name,
-          size: getFileSize(file),
-          type: file.type || "unknown",
-        });
-
-        if (file.type.startsWith("video/") && file.size > maxVideoUploadSize) {
-          failedFiles.push(createFailedFile(file, "Video je veći od 25 MB"));
-          continue;
-        }
-
-        uploadFiles.push({
+      const uploadFiles = sortFilesSmallestFirst(files).map(
+        (file, index): UploadFile => ({
           file,
-          originalName: file.name,
-          originalSize: getFileSize(file),
-          originalType: file.type || "unknown",
           position: index + 1,
-        });
-      }
+          confirmedBytes: 0,
+        })
+      );
 
-      for (const uploadFile of uploadFiles) {
-        setStatus(
-          `Šalje se ${uploadFile.position}/${files.length}: ${uploadFile.file.name}`
-        );
-        setStatusType("success");
+      const result = await processUploadQueue(
+        uploadFiles,
+        async (uploadFile, context: UploadAttemptContext) => {
+          let lastPercentage = -1;
+          const retryLabel =
+            context.phase === "retry"
+              ? `Ponovni pokušaj ${context.retryNumber}/${MAX_FILE_RETRIES} — `
+              : "";
+          const showProgress = (percentage: number) => {
+            if (percentage === lastPercentage) return;
+            lastPercentage = percentage;
+            setStatus(
+              `${retryLabel}Šalje se fajl ${uploadFile.position}/${uploadFiles.length} (${percentage}%)`
+            );
+          };
 
-        const batchFormData = new FormData();
-        batchFormData.append("name", name);
-        batchFormData.append("message", message);
-        batchFormData.append("files", uploadFile.file, uploadFile.file.name);
-
-        try {
-          const res = await fetch(`${backendUrl}/upload`, {
-            method: "POST",
-            body: batchFormData,
-          });
-
-          const responseBody = await res.text();
-
-          console.log("Backend upload response", {
-            fileName: uploadFile.originalName,
-            processedFileName: uploadFile.file.name,
-            status: res.status,
-            ok: res.ok,
-            body: responseBody,
-          });
-
-          if (!res.ok) {
-            let backendMessage = responseBody || res.statusText || "Upload nije uspio.";
-
-            try {
-              const data = JSON.parse(responseBody) as {
-                error?: string;
-                details?: string;
-              };
-              backendMessage =
-                [data.error, data.details].filter(Boolean).join(" - ") ||
-                backendMessage;
-            } catch {
-              backendMessage = responseBody || res.statusText || backendMessage;
-            }
-
-            failedFiles.push({
-              fileName: uploadFile.originalName,
-              fileSize: uploadFile.originalSize,
-              fileType: uploadFile.originalType,
-              reason: `Backend error ${res.status}: ${backendMessage}`,
-            });
-
-            console.error("Backend upload failed", {
-              fileName: uploadFile.originalName,
-              processedFileName: uploadFile.file.name,
-              status: res.status,
-              body: responseBody,
-            });
-            continue;
-          }
-
-          successfulUploads += 1;
-        } catch (error: unknown) {
-          const reason = `Upload request nije uspio: ${getErrorMessage(error)}`;
-
-          failedFiles.push({
-            fileName: uploadFile.originalName,
-            fileSize: uploadFile.originalSize,
-            fileType: uploadFile.originalType,
-            reason,
-          });
-
-          console.error("Upload request failed", {
-            fileName: uploadFile.originalName,
-            processedFileName: uploadFile.file.name,
-            originalSize: uploadFile.originalSize,
-            originalType: uploadFile.originalType,
-            error,
-          });
+          setStatusType("success");
+          setStatusFileName(uploadFile.file.name);
+          showProgress(
+            calculateUploadPercentage(
+              uploadFile.confirmedBytes,
+              0,
+              uploadFile.file.size
+            )
+          );
+          await uploadFileAttempt(
+            uploadFile,
+            backendUrl,
+            name,
+            message,
+            showProgress
+          );
         }
-      }
+      );
+
+      const successfulUploads = result.successful.length;
+      const failedFiles = result.failed.map(({ item, error }) =>
+        createFailedFile(item.file, getErrorMessage(error))
+      );
 
       if (successfulUploads > 0) {
         form.reset();
-        setSelectedFileCount(0);
+        setSelectedFiles([]);
+        if (fileInputRef.current) fileInputRef.current.value = "";
       }
+
+      setStatusFileName("");
 
       if (failedFiles.length === 0) {
         setStatus("Hvala vam! Vaše uspomene su uspješno poslane.");
@@ -217,7 +486,7 @@ export default function HomePage() {
       }
 
       setStatus(
-        `Nijedan fajl nije poslan. Pokušajte sa manjim fotografijama ili bez velikih video zapisa.\nNisu prošli:\n${formatFailedFiles(
+        `Nijedan fajl nije poslan nakon ponovnih pokušaja.\nNisu prošli:\n${formatFailedFiles(
           failedFiles
         )}`
       );
@@ -225,6 +494,7 @@ export default function HomePage() {
     } catch (error: unknown) {
       setStatus(getErrorMessage(error));
       setStatusType("error");
+      setStatusFileName("");
     } finally {
       setLoading(false);
     }
@@ -441,14 +711,14 @@ export default function HomePage() {
 
                   <label className="group block cursor-pointer rounded-2xl border border-dashed border-[#9fb59d] bg-[#f5faf4]/80 p-4 transition hover:border-[#315f4f] hover:bg-white">
                     <input
+                      ref={fileInputRef}
                       name="files"
                       type="file"
                       multiple
                       accept="image/*,video/*"
+                      disabled={loading}
                       className="sr-only"
-                      onChange={(event) =>
-                        setSelectedFileCount(event.target.files?.length ?? 0)
-                      }
+                      onChange={handleFilesSelected}
                     />
                     <span className="flex items-center gap-4">
                       <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#dfeadd] text-[#315f4f] shadow-inner">
@@ -477,8 +747,8 @@ export default function HomePage() {
                       </span>
                       <span>
                         <span className="block text-sm font-bold text-[#19382e]">
-                          {selectedFileCount > 0
-                            ? `Dodali ste ${selectedFileCount} slika`
+                          {selectedFiles.length > 0
+                            ? `Dodali ste ${selectedFiles.length} fajlova`
                             : "Dodajte fotografije ili video zapise"}
                         </span>
                         <span className="mt-1 block text-xs leading-5 text-[#5f7167]">
@@ -492,7 +762,10 @@ export default function HomePage() {
                             MP4, MOV
                           </span>
                           <span className="rounded-full bg-white px-2 py-1">
-                            Do 1GB
+                            Do 1 GB po fajlu
+                          </span>
+                          <span className="rounded-full bg-white px-2 py-1">
+                            Najviše 100 fajlova
                           </span>
                         </span>
                       </span>
@@ -500,7 +773,8 @@ export default function HomePage() {
                   </label>
 
                   <p className="mt-3 text-center text-xs leading-5 text-[#5f7167]">
-                    Možete dodati više fotografija ili video zapisa odjednom.
+                    Fajlove možete dodavati iz više izbora. Šalju se prvo
+                    najmanji fajlovi.
                   </p>
                 </div>
 
@@ -519,15 +793,20 @@ export default function HomePage() {
               </form>
 
               {status && (
-                <p
+                <div
                   className={`relative z-10 mt-5 rounded-2xl border px-4 py-3 text-center text-sm font-semibold leading-6 ${
                     statusType === "success"
                       ? "border-[#b8d7bd] bg-[#f4fbf1] text-[#315f3b]"
                       : "border-[#e7b9b1] bg-[#fff3f1] text-[#8a3a32]"
                   } whitespace-pre-line`}
                 >
-                  {status}
-                </p>
+                  <p>{status}</p>
+                  {statusFileName && (
+                    <p className="mt-1 break-all text-xs font-normal opacity-80">
+                      {statusFileName}
+                    </p>
+                  )}
+                </div>
               )}
 
               <div className="relative z-10 mx-auto mt-8 flex w-32 items-center justify-center gap-2 text-[#6f8d6a]">
